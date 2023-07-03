@@ -18,3 +18,7 @@ Main pipeline:
 - modified images -> video
   - ffmpeg
 
+Speed is critical:
+- quantize main components
+- aync alternating key frames for edge maps and pose maps?
+- time dependent runtime optimization via hand tuning a gradio hyperparam sheet?
