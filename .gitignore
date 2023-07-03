@@ -3,6 +3,24 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# logs
+logs/
+
+# data
+data/
+
+# CSV files
+*.csv
+
+# Keys
+.keys/
+
+# C extensions
+*.so
+
+# Models
+*.pth
+
 # C extensions
 *.so
 
