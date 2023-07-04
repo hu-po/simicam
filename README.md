@@ -14,6 +14,12 @@ conda activate simicam
 pip install -r requirements_pt2.txt
 ```
 
+Setup through transfomers
+
+```
+pip install transformers accelerate safetensors
+```
+
 ## Brainstorm 03.07.2023
 
 Main pipeline:
