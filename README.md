@@ -2,7 +2,19 @@
 
 Generative AI for real world video editing
 
-# Brainstorm 03.07.2023
+
+## Install StableDiffusionXL
+
+Current setup is PyTorch2.0 and CUDA12.0:
+
+```
+git clone git@github.com:Stability-AI/generative-models.git
+conda create -n simicam python=3.10
+conda activate simicam
+pip install -r requirements_pt2.txt
+```
+
+## Brainstorm 03.07.2023
 
 Main pipeline:
 - video -> frames

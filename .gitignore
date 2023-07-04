@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Stable diffusion fork
+generative-models/
+
 # logs
 logs/
 
