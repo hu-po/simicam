@@ -20,6 +20,14 @@ Setup through transfomers
 pip install transformers accelerate safetensors
 ```
 
+Camera dependencies
+
+```
+sudo apt install ffmpeg
+pip install opencv-python
+```
+
+
 ## Brainstorm 03.07.2023
 
 Main pipeline:

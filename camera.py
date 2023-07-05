@@ -8,7 +8,6 @@ ffplay -f v4l2 -framerate 30 -video_size 224x224 -i /dev/video0
 """
 
 import logging
-import time
 from contextlib import contextmanager
 
 import cv2
@@ -48,3 +47,10 @@ def camera_ctx(
     finally:
         log.info("Ended video capture")
         del cap
+
+if __name__ == "__main__":
+    with camera_ctx() as np_image:
+        while True:
+            image = np_image()
+            cv2.imshow("image", image)
+            cv2.waitKey(1)
