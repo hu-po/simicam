@@ -3,10 +3,11 @@
 Generative AI for real world video editing
 
 
-## Install StableDiffusionXL
+## Dependencies
 
-Current setup is PyTorch2.0 and CUDA12.0:
+Current setup is PyTorch2.0 and CUDA12.0.
 
+Stable Diffusion XL
 ```
 git clone git@github.com:Stability-AI/generative-models.git
 conda create -n simicam python=3.10
@@ -27,6 +28,11 @@ sudo apt install ffmpeg
 pip install opencv-python
 ```
 
+MobileSAM
+
+```
+pip install git+https://github.com/ChaoningZhang/MobileSAM.git
+```
 
 ## Brainstorm 03.07.2023
 

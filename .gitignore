@@ -12,6 +12,9 @@ logs/
 # data
 data/
 
+# weights
+weights/
+
 # CSV files
 *.csv
 
