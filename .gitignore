@@ -13,7 +13,7 @@ logs/
 data/
 
 # weights
-weights/
+*.pt
 
 # CSV files
 *.csv

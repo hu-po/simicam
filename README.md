@@ -3,7 +3,13 @@
 Generative AI for real world video editing
 
 
-## Dependencies
+## 06.07.2023 - Brainstorm
+
+SAM microservice - containerized, requires GPU, takes input frame (smol), outputs edge map (smol)
+Diffusion microservice - containerized, requires GPU, takes input frame (large) and edge map (smol), outputs modified frame (large)
+Camera service - not containerized, no GPU, takes input video, outputs modified video?
+
+## 05.07.2023 - Dependencies
 
 Current setup is PyTorch2.0 and CUDA12.0.
 
@@ -12,7 +18,7 @@ Stable Diffusion XL
 git clone git@github.com:Stability-AI/generative-models.git
 conda create -n simicam python=3.10
 conda activate simicam
-pip install -r requirements_pt2.txt
+pip install -r requirements.txt
 ```
 
 Setup through transfomers
@@ -34,7 +40,7 @@ MobileSAM
 pip install git+https://github.com/ChaoningZhang/MobileSAM.git
 ```
 
-## Brainstorm 03.07.2023
+## 03.07.2023 - Brainstorm
 
 Main pipeline:
 - video -> frames
