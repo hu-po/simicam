@@ -13,10 +13,6 @@ Install nvidia docker
 
 https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
 
-```
-$ curl https://get.docker.com | sh \ && sudo systemctl --now enable docker
-```
-
 https://docs.docker.com/engine/install/linux-postinstall/
 
 
