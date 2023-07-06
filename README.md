@@ -9,6 +9,17 @@ SAM microservice - containerized, requires GPU, takes input frame (smol), output
 Diffusion microservice - containerized, requires GPU, takes input frame (large) and edge map (smol), outputs modified frame (large)
 Camera service - not containerized, no GPU, takes input video, outputs modified video?
 
+Install nvidia docker
+
+https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
+
+```
+$ curl https://get.docker.com | sh \ && sudo systemctl --now enable docker
+```
+
+https://docs.docker.com/engine/install/linux-postinstall/
+
+
 ## 05.07.2023 - Dependencies
 
 Current setup is PyTorch2.0 and CUDA12.0.
