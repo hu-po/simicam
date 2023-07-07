@@ -3,7 +3,12 @@
 Generative AI for real world video editing
 
 
-## 06.07.2023 - Brainstorm
+## 07.07.2023
+
+- Convert images to binary to be passed over zmq connection, this overhead might be slow. Using small images (256x256) here is probably necessary.
+- SDXL = Base LDM + Refiner LDM + VAE decoder + 2 x CLIP encoder - which of these pieces can be quantized, which are not required, which can be replaced
+
+## 06.07.2023
 
 SAM microservice - containerized, requires GPU, takes input frame (smol), outputs edge map (smol)
 Diffusion microservice - containerized, requires GPU, takes input frame (large) and edge map (smol), outputs modified frame (large)
