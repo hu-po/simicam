@@ -26,4 +26,17 @@ async def send_request_async(
     return response
 
 if __name__ == "__main__":
-    asyncio.run(send_request_async({"message": "Hello, World!"}))
+
+    # Test SAM service
+    asyncio.run(send_request_async(
+        {"message": "Hello, World!"},
+        ip = "127.0.0.1",
+        port = "5555",
+    ))
+
+    # Test SDXL service
+    asyncio.run(send_request_async(
+        {"message": "Hello, World!"},
+        ip = "127.0.0.1",
+        port = "5555",
+    ))
