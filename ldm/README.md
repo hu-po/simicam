@@ -1,10 +1,10 @@
-# Segmentation MicroService
+# Stable Diffusion XL MicroService
 
-sam = segment anything model
+ldm = latent diffusion model
 
 ```
 docker build \
-     -t "simicam/sam" \
+     -t "simicam/ldm" \
      -f Dockerfile .
 ```
 
