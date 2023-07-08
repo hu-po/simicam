@@ -13,6 +13,7 @@ logs/
 data/
 
 # weights
+ckpt/
 *.pt
 *.pth
 *.safetensors

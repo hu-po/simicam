@@ -9,11 +9,14 @@ import json
 import logging
 from pprint import pformat
 
+import numpy as np
 import torch
 import zmq
 import zmq.asyncio
-from mobile_sam import sam_model_registry
+from mobile_sam import SamAutomaticMaskGenerator, sam_model_registry
+from PIL import Image
 
+# from mobile_sam import sam_model_registry, SamAutomaticMaskGenerator, SamPredictor
 log = logging.getLogger(__name__)
 
 
@@ -52,17 +55,18 @@ def model_inference(
     # predictor.set_image(<your_image>)
     # masks, _, _ = predictor.predict(<input_prompts>)
 
-    # # Entire image at once
-    # mask_generator = SamAutomaticMaskGenerator(model)
-    # mask_generator.generate(None)
-
+    # Entire image at once
+    mask_generator = SamAutomaticMaskGenerator(model)
+    image = np.array(Image.open('data/test.png'))
+    masks = mask_generator.generate(image)
+    print(f"masks: {masks}")
     return model
 
 
 if __name__ == "__main__":
     BIND_URI = "tcp://*:5555"
 
-    model_inference()
+    model = model_inference()
     
     # Server Side
     asyncio.run(receive_request_async())

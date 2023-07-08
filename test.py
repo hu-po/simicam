@@ -29,14 +29,19 @@ if __name__ == "__main__":
 
     # Test SAM service
     asyncio.run(send_request_async(
-        {"message": "Hello, World!"},
+        {
+            "input_img_path": "data/test.png",
+            "output_img_path": "data/test_out_sam.png",
+        },
         ip = "127.0.0.1",
-        port = "5555",
+        port = "5556",
     ))
 
     # Test SDXL service
     asyncio.run(send_request_async(
-        {"message": "Hello, World!"},
+        {
+            "prompt": "white bengal cat",
+        },
         ip = "127.0.0.1",
         port = "5555",
     ))

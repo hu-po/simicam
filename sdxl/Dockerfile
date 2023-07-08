@@ -8,12 +8,10 @@ RUN pip install \
     accelerate \
     safetensors \
     pyzmq
-WORKDIR /workspace
-# COPY ./*.safetensors /workspace
-# COPY ./*.py /workspace
 RUN apt-get update && apt-get install -y git
 RUN git clone https://github.com/Stability-AI/generative-models.git
 WORKDIR /workspace/generative-models
 RUN python setup.py install
 WORKDIR /workspace
-# CMD ["python3", "sdxl.py"]
+COPY ./*.py /workspace
+CMD ["python3", "sdxl.py"]

@@ -1,10 +1,8 @@
-# Segmentation MicroService
-
-sam = segment anything model
+# Stable Diffusion XL MicroService
 
 ```
 docker build \
-     -t "simicam/sam" \
+     -t "simicam/ldm" \
      -f Dockerfile .
 ```
 
@@ -13,10 +11,10 @@ DATA_PATH="/home/oop/dev/simicam/data" \
 CKPT_PATH="/home/oop/dev/simicam/ckpt" \
 docker run \
     -it \
-    -p 5556:5556 \
     --gpus all \
+    -p 5555:5555 \
     -v ${DATA_PATH}:/workspace/data \
-    -v ${CKPT_PATH}:/workspace/weights \
-    simicam/sam \
+    -v ${CKPT_PATH}:/workspace/generative-models/checkpoints \
+    simicam/ldm \
     bash
 ```

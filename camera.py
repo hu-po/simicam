@@ -16,9 +16,9 @@ import numpy as np
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
-IMAGE_WIDTH = 224
-IMAGE_HEIGHT = 224
-FPS = 36
+IMAGE_WIDTH = 256
+IMAGE_HEIGHT = 256
+FPS = 10
 
 
 @contextmanager
