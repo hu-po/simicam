@@ -9,11 +9,10 @@ import json
 import logging
 from pprint import pformat
 
-import cv2
 import torch
 import zmq
 import zmq.asyncio
-from mobile_sam import SamAutomaticMaskGenerator, sam_model_registry
+from mobile_sam import sam_model_registry
 
 log = logging.getLogger(__name__)
 
@@ -48,24 +47,22 @@ def model_inference(
         model.to(device=device)
         model.eval()
 
-    TEST_IMAGE_FILEPATH = "/home/oop/Downloads/car.jpeg"
-    image = cv2.imread(TEST_IMAGE_FILEPATH)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
     # With prompts
     # predictor = SamPredictor(model)
     # predictor.set_image(<your_image>)
     # masks, _, _ = predictor.predict(<input_prompts>)
 
-    # Entire image at once
-    mask_generator = SamAutomaticMaskGenerator(model)
-    mask_generator.generate(image)
+    # # Entire image at once
+    # mask_generator = SamAutomaticMaskGenerator(model)
+    # mask_generator.generate(None)
 
     return model
 
 
 if __name__ == "__main__":
     BIND_URI = "tcp://*:5555"
+
+    model_inference()
     
     # Server Side
     asyncio.run(receive_request_async())

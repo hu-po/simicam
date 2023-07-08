@@ -1,26 +1,14 @@
-# Start from the pytorch image
-FROM pytorch/pytorch:1.7.1-cuda11.1-cudnn8-runtime
-
-# Make sure pip is up to date
+FROM pytorch/pytorch:2.0.0-cuda11.7-cudnn8-runtime
 RUN pip install --upgrade pip
-
-# Installing required packages
 RUN pip install \
-    torch==1.7.1 \
-    torchvision==0.8.2 \
+    torchvision \
     timm \
-    opencv-python \
-    pyzmq \
-    git+https://github.com/dhkim2810/MobileSAM.git
-
-# Copy over model weights
-COPY ./mobile_sam.pt /sam/mobile_sam.pt
-
-# Copy over python script
-COPY ./sam.py /sam/sam.py
-
-# Set the working directory
-WORKDIR /sam
-
-# Set the default command to python3
-CMD ["python3", "sam.py"]
+    pyzmq
+RUN apt-get update && apt-get install -y git
+RUN git clone https://github.com/dhkim2810/MobileSAM.git
+WORKDIR /workspace/MobileSAM
+RUN python setup.py install
+COPY ./mobile_sam.pt /workspace/weights/mobile_sam.pt
+COPY ./*.py /workspace
+WORKDIR /workspace
+# CMD ["python3", "sam.py"]
