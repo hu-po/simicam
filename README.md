@@ -21,7 +21,7 @@ docker run \
     -p 5556:5556 \
     --gpus all \
     -v ${DATA_PATH}:/workspace/data \
-    -v ${CKPT_PATH}:/workspace/weights \
+    -v ${CKPT_PATH}:/workspace/ckpt \
     simicam/sam \
     bash
 ```

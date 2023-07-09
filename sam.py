@@ -4,6 +4,8 @@ https://github.com/chaoningzhang/mobilesam#installation
 
 """
 
+import argparse
+import asyncio
 import logging
 from typing import Any, Dict
 
@@ -11,17 +13,20 @@ import numpy as np
 from mobile_sam import SamAutomaticMaskGenerator, SamPredictor, sam_model_registry
 from PIL import Image
 
-from utils import get_device, time_and_log
+from utils import get_device, microservice_server, time_and_log
 
 log = logging.getLogger(__name__)
+args = argparse.ArgumentParser()
+args.add_argument("--test", action="store_true")
 
-# HOTFIX: Create a type SAM for Any
+# HACK: Create a model type object from Any
 Sam = Any
+
 
 @time_and_log
 def load_model(
     model: str = "vit_t",
-    checkpoint="./weights/mobile_sam.pt",
+    checkpoint="./ckpt/mobile_sam.pt",
     device="gpu",
 ):
     device = get_device(device)
@@ -39,6 +44,7 @@ def get_masks(
     image: np.ndarray = None,
     model: Sam = None,
     prompts: Dict = None,
+    **kwargs,
 ):
     if prompts:
         log.debug(f"Using prompts {prompts}")
@@ -60,15 +66,14 @@ def test_model_inference(
 ):
     logging.basicConfig(level=logging.DEBUG)
     log.debug("Testing model inference")
-    model = load_model()
+    model_data = load_model()
     image = np.array(Image.open(image_filepath))
     image_width = image.shape[0]
     image_height = image.shape[1]
     log.debug("Testing get masks no prompt")
-    _ = get_masks(model=model, prompts=None)
+    _ = get_masks(prompts=None, **model_data)
     log.debug("Testing get masks with point prompt")
     _ = get_masks(
-        model=model,
         prompts={
             # point_coords (np.ndarray or None): A Nx2 array of point prompts to the
             #     model. Each point is in (X,Y) in pixels.
@@ -82,6 +87,7 @@ def test_model_inference(
             #     point prompts. 1 indicates a foreground point and 0 indicates a background point.
             "point_labels": np.array([1, 0]),
         },
+        **model_data,
     )
 
 
@@ -101,5 +107,12 @@ async def process_request(
 
 
 if __name__ == "__main__":
-    test_model_inference()
-    # asyncio.run(microservice_server(init_func=load_model, loop_func=process_request))
+    args = args.parse_args()
+    if args.test:
+        log.info("Testing SAM model inference")
+        test_model_inference()
+    else:
+        log.info("Starting SAM microservice")
+        asyncio.run(
+            microservice_server(init_func=load_model, loop_func=process_request)
+        )
