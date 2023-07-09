@@ -7,50 +7,90 @@ ffplay -f v4l2 -framerate 30 -video_size 224x224 -i /dev/video0
 
 """
 
+import asyncio
+import argparse
 import logging
-from contextlib import contextmanager
+from datetime import datetime, timedelta
+from typing import Dict
+from utils import microservice_server, time_and_log
 
 import cv2
 import numpy as np
+from cv2 import VideoCapture
 
-logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
+args = argparse.ArgumentParser()
+args.add_argument("--test", action="store_true")
+
 
 IMAGE_WIDTH = 256
 IMAGE_HEIGHT = 256
-FPS = 10
+FPS = 30
 
+# IMAGE_WIDTH = 512
+# IMAGE_HEIGHT = 512
+# FPS = 30
 
-@contextmanager
-def camera_ctx(
+# IMAGE_WIDTH = 1024
+# IMAGE_HEIGHT = 1024
+# FPS = 10
+
+@time_and_log
+def start_camera(
     width: int = IMAGE_WIDTH,
     height: int = IMAGE_HEIGHT,
     fps: int = FPS,
-) -> np.ndarray:
-    log.info("Starting video capture")
-    cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-    cap.set(cv2.CAP_PROP_FPS, fps)
+    **kwargs,
+) -> Dict:
+    log.info(f"Starting video capture at {width}x{height} @ {fps}fps")
+    camera: VideoCapture = cv2.VideoCapture(0, cv2.CAP_V4L2)
+    camera.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+    camera.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+    camera.set(cv2.CAP_PROP_FPS, fps)
+    return {
+        "camera": camera,
+        "camera_start_date": datetime.now(),
+    }
 
-    def np_image() -> np.ndarray:
-        ret, image = cap.read()
-        if not ret:
-            log.error("Failed to capture frame")
-            return None
-        # convert opencv output from BGR to RGB
-        image = image[:, :, [2, 1, 0]]
-        return image
 
-    try:
-        yield np_image
-    finally:
-        log.info("Ended video capture")
-        del cap
+@time_and_log
+def take_image(
+    camera: VideoCapture = None,
+    last_timestamp: datetime = None,
+    **kwargs,
+) -> Dict:
+    image_timestamp = datetime.now()
+    last_timestamp = last_timestamp or image_timestamp
+    log.info(f"Taking image at {image_timestamp}")
+    log.debug(f"Last image taken at {last_timestamp}")
+    log.debug(f"Time since last image: {image_timestamp - last_timestamp}")
+    ret, image = camera.read()
+    if not ret:
+        log.error("Failed to capture frame")
+        return None
+    # convert opencv output from BGR to RGB
+    image: np.ndarray = image[:, :, [2, 1, 0]]
+    return {
+        "image": image,
+        "image_timestamp": image_timestamp,
+        "image_timedelta": image_timestamp - last_timestamp,
+    }
+
+def test_camera():
+    camera_data = start_camera()
+    while True:
+        image_data = take_image(**camera_data)
+        cv2.imshow("image", image_data["image"])
+        cv2.waitKey(1)
+
 
 if __name__ == "__main__":
-    with camera_ctx() as np_image:
-        while True:
-            image = np_image()
-            cv2.imshow("image", image)
-            cv2.waitKey(1)
+    args = args.parse_args()
+    if args.test:
+        log.info("Testing camera locally with opencv")
+        test_camera()
+    else:
+        log.info("Starting Camera microservice")
+        asyncio.run(
+            microservice_server(init_func=start_camera, loop_func=take_image)
+        )
