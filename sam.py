@@ -4,18 +4,19 @@ https://github.com/chaoningzhang/mobilesam#installation
 
 """
 
-import asyncio
 import logging
-from typing import Dict
+from typing import Any, Dict
 
 import numpy as np
-from mobile_sam import Sam, SamAutomaticMaskGenerator, SamPredictor, sam_model_registry
+from mobile_sam import SamAutomaticMaskGenerator, SamPredictor, sam_model_registry
 from PIL import Image
 
-from ..utils import get_device, microservice_server, time_and_log
+from utils import get_device, time_and_log
 
 log = logging.getLogger(__name__)
 
+# HOTFIX: Create a type SAM for Any
+Sam = Any
 
 @time_and_log
 def load_model(
@@ -57,8 +58,8 @@ def get_masks(
 def test_model_inference(
     image_filepath="data/test.png",
 ):
+    logging.basicConfig(level=logging.DEBUG)
     log.debug("Testing model inference")
-    log.setLevel(logging.DEBUG)
     model = load_model()
     image = np.array(Image.open(image_filepath))
     image_width = image.shape[0]
@@ -101,4 +102,4 @@ async def process_request(
 
 if __name__ == "__main__":
     test_model_inference()
-    asyncio.run(microservice_server(init_func=load_model, loop_func=process_request))
+    # asyncio.run(microservice_server(init_func=load_model, loop_func=process_request))

@@ -3,6 +3,50 @@
 Generative AI for real world video editing
 
 
+## Segmentation MicroService
+
+sam = segment anything model
+
+```
+docker build \
+     -t "simicam/sam" \
+     -f Dockerfile.sam .
+```
+
+```
+DATA_PATH="/home/oop/dev/simicam/data" \
+CKPT_PATH="/home/oop/dev/simicam/ckpt" \
+docker run \
+    -it \
+    -p 5556:5556 \
+    --gpus all \
+    -v ${DATA_PATH}:/workspace/data \
+    -v ${CKPT_PATH}:/workspace/weights \
+    simicam/sam \
+    bash
+```
+
+## Stable Diffusion XL MicroService
+
+```
+docker build \
+     -t "simicam/sdxl" \
+     -f Dockerfile.sdxl .
+```
+
+```
+DATA_PATH="/home/oop/dev/simicam/data" \
+CKPT_PATH="/home/oop/dev/simicam/ckpt" \
+docker run \
+    -it \
+    --gpus all \
+    -p 5555:5555 \
+    -v ${DATA_PATH}:/workspace/data \
+    -v ${CKPT_PATH}:/workspace/generative-models/checkpoints \
+    simicam/sdxl \
+    bash
+```
+
 ## 07.07.2023
 
 - Convert images to binary to be passed over zmq connection, this overhead might be slow. Using small images (256x256) here is probably necessary.

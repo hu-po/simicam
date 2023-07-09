@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y git
 RUN git clone https://github.com/dhkim2810/MobileSAM.git
 WORKDIR /workspace/MobileSAM
 RUN python setup.py install
-COPY ./*.py /workspace
+COPY ./sam.py /workspace
+COPY ./utils.py /workspace
 WORKDIR /workspace
 CMD ["python3", "sam.py"]
