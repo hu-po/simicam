@@ -2,7 +2,7 @@
 
 ```
 docker build \
-     -t "simicam/ldm" \
+     -t "simicam/sdxl" \
      -f Dockerfile .
 ```
 
@@ -15,6 +15,6 @@ docker run \
     -p 5555:5555 \
     -v ${DATA_PATH}:/workspace/data \
     -v ${CKPT_PATH}:/workspace/generative-models/checkpoints \
-    simicam/ldm \
+    simicam/sdxl \
     bash
 ```

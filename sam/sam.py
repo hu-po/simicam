@@ -20,7 +20,7 @@ from PIL import Image
 log = logging.getLogger(__name__)
 
 
-async def receive_request_async(ip: str = "127.0.0.1", port: str = "5555") -> None:
+async def receive_request_async(ip: str = "127.0.0.1", port: str = "5556") -> None:
     log.info(f"Listening on {ip}:{port} ...")
     context = zmq.asyncio.Context()
     socket = context.socket(zmq.REP)
@@ -64,7 +64,7 @@ def model_inference(
 
 
 if __name__ == "__main__":
-    BIND_URI = "tcp://*:5555"
+    BIND_URI = "tcp://*:5556"
 
     model = model_inference()
     
