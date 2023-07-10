@@ -2,6 +2,9 @@
 
 Generative AI for real world video editing
 
+```
+docker-compose -f docker-compose.prod.yml up
+```
 
 ## Segmentation MicroService
 
@@ -14,8 +17,11 @@ docker build \
 ```
 
 ```
-DATA_PATH="/home/oop/dev/simicam/data" \
-CKPT_PATH="/home/oop/dev/simicam/ckpt" \
+export DATA_PATH="/home/oop/dev/simicam/data" \
+export CKPT_PATH="/home/oop/dev/simicam/ckpt"
+```
+
+```
 docker run \
     -it \
     -p 5556:5556 \
@@ -24,6 +30,16 @@ docker run \
     -v ${CKPT_PATH}:/workspace/ckpt \
     simicam/sam \
     bash
+```
+
+```
+docker run \
+    -t \
+    -p 5555:5555 \
+    --gpus all \
+    -v ${DATA_PATH}:/workspace/data \
+    -v ${CKPT_PATH}:/workspace/ckpt \
+    simicam/sam
 ```
 
 ## Stable Diffusion XL MicroService
@@ -45,6 +61,17 @@ docker run \
     -v ${CKPT_PATH}:/workspace/generative-models/checkpoints \
     simicam/sdxl \
     bash
+```
+
+```
+DATA_PATH="/home/oop/dev/simicam/data" \
+CKPT_PATH="/home/oop/dev/simicam/ckpt" \
+docker run \
+    -p 5556:5556 \
+    --gpus all \
+    -v ${DATA_PATH}:/workspace/data \
+    -v ${CKPT_PATH}:/workspace/ckpt \
+    simicam/sdxl
 ```
 
 ## 07.07.2023

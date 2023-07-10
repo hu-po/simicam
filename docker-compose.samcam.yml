@@ -1,0 +1,20 @@
+version: '3.7'
+services:
+  sam:
+    image: simicm/sam
+    container_name: sam
+    command: python3 sam.py
+    ports:
+      - 5555:5555
+    volumes:
+      - ${DATA_PATH}:/workspace/data
+      - ${CKPT_PATH}:/workspace/ckpt
+  sdxl:
+    image: simicm/sdxl
+    container_name: sdxl
+    command: python3 sdxl.py
+    ports:
+      - 5556:5556
+    volumes:
+      - ${DATA_PATH}:/workspace/data
+      - ${CKPT_PATH}:/workspace/ckpt
