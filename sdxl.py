@@ -25,7 +25,7 @@ def load_vae(
     _ = get_device("gpu")
     config = OmegaConf.load(config)
     model = instantiate_from_config(config.model)
-    sd = load_safetensors(ckpt)
+    sd = load_safetensors(ckpt, device=device)
     m, u = model.load_state_dict(sd, strict=False)
     if len(m) > 0 and verbose:
         print("missing keys:")
