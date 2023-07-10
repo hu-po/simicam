@@ -13,7 +13,7 @@ import numpy as np
 from mobile_sam import SamAutomaticMaskGenerator, SamPredictor, sam_model_registry
 from PIL import Image
 
-from utils import get_device, microservice_server, time_and_log
+from src import get_device, miniserver, time_and_log
 
 log = logging.getLogger(__name__)
 args = argparse.ArgumentParser()
@@ -114,5 +114,5 @@ if __name__ == "__main__":
     else:
         log.info("Starting SAM microservice")
         asyncio.run(
-            microservice_server(init_func=load_model, loop_func=process_request)
+            miniserver(init_func=load_model, loop_func=process_request)
         )

@@ -12,7 +12,7 @@ import argparse
 import logging
 from datetime import datetime, timedelta
 from typing import Dict
-from utils import microservice_server, time_and_log
+from src import miniserver, time_and_log
 
 import cv2
 import numpy as np
@@ -92,5 +92,5 @@ if __name__ == "__main__":
     else:
         log.info("Starting Camera microservice")
         asyncio.run(
-            microservice_server(init_func=start_camera, loop_func=take_image)
+            miniserver(init_func=start_camera, loop_func=take_image)
         )
