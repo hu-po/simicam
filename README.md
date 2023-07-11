@@ -24,7 +24,7 @@ export CKPT_PATH="/home/oop/dev/simicam/ckpt"
 ```
 docker run \
     -it \
-    -p 5556:5556 \
+    -p 5555:5555 \
     --gpus all \
     -v ${DATA_PATH}:/workspace/data \
     -v ${CKPT_PATH}:/workspace/ckpt \

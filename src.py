@@ -80,7 +80,8 @@ def time_and_log(func):
 async def miniserver(
     ip: str = "127.0.0.1",
     port: str = "5555",
-    timeout: timedelta = timedelta(seconds=30),
+    sock_timeout: timedelta = timedelta(seconds=30),
+    recv_timeout: timedelta = timedelta(seconds=1),
     init_func: Callable = None,
     loop_func: Callable = None,
     **kwargs,
@@ -91,9 +92,9 @@ async def miniserver(
     socket.bind(f"tcp://{ip}:{port}")
     _init_output: Dict = init_func(**kwargs)
     start_time: datetime = datetime.now()
-    log.info(f"Starting server, timeout: {timeout}")
+    log.info(f"Starting server, socket timeout: {sock_timeout}")
     while True:
-        if (datetime.now() - start_time) > timeout:
+        if (datetime.now() - start_time) > sock_timeout:
             log.info("Timeout reached. Closing server.")
             return
         log.info("Waiting for a request...")
@@ -108,7 +109,8 @@ async def miniserver(
 async def miniclient(
     ip: str = "127.0.0.1",
     port: str = "5555",
-    timeout: timedelta = timedelta(seconds=30),
+    sock_timeout: timedelta = timedelta(seconds=30),
+    recv_timeout: timedelta = timedelta(seconds=1),
     request_func: Callable = None,
     **kwargs,
 ) -> Dict:
@@ -117,9 +119,9 @@ async def miniclient(
     socket = context.socket(zmq.REQ)
     socket.connect(f"tcp://{ip}:{port}")
     start_time: datetime = datetime.now()
-    log.info(f"Starting client, timeout: {timeout}")
+    log.info(f"Starting client, socket timeout: {sock_timeout}")
     while True:
-        if (datetime.now() - start_time) > timeout:
+        if (datetime.now() - start_time) > sock_timeout:
             log.info("Timeout reached. Closing client.")
             return
         request: Dict = request_func(**kwargs)

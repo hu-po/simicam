@@ -16,5 +16,5 @@ RUN python setup.py install
 RUN pip install -r requirements_pt2.txt
 WORKDIR /workspace
 COPY ./sdxl.py /workspace
-COPY ./utils.py /workspace
+COPY ./src.py /workspace
 CMD ["python3", "sdxl.py"]
