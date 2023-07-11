@@ -38,7 +38,7 @@ ch.setLevel(LOG_LEVEL)
 ch.setFormatter(formatter)
 log.addHandler(ch)
 # Set up file handler
-logfile_name = f"_{__name__}_{datetime.now().strftime(DATEFORMAT)}.log"
+logfile_name = f"{datetime.now().strftime(DATEFORMAT)}.log"
 logfile_path = os.path.join(LOG_DIR, logfile_name)
 fh = logging.FileHandler(logfile_path)
 fh.setLevel(LOG_LEVEL)

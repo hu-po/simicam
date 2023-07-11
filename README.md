@@ -2,6 +2,18 @@
 
 Generative AI for real world video editing
 
+
+## 11.07.2023
+
+Helpful docker commands
+
+```
+docker ps -a
+docker rm -f $(docker ps -aq)
+docker image ls
+docker image prune
+```
+
 ```
 docker-compose -f docker-compose.prod.yml up
 ```
