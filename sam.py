@@ -13,7 +13,7 @@ import numpy as np
 from mobile_sam import SamAutomaticMaskGenerator, SamPredictor, sam_model_registry
 from PIL import Image
 
-from src import get_device, miniserver, time_and_log
+from src import get_device, miniserver, time_and_log, decode_image, encode_image
 
 log = logging.getLogger(__name__)
 args = argparse.ArgumentParser()
@@ -44,6 +44,7 @@ def get_masks(
     image: np.ndarray = None,
     model: Sam = None,
     prompts: Dict = None,
+    max_masks: int = 10,
     **kwargs,
 ):
     if prompts:
@@ -54,11 +55,10 @@ def get_masks(
     else:
         log.debug("Using automatic mask generation")
         mask_generator = SamAutomaticMaskGenerator(model)
-        image = np.array(Image.open("data/test.png"))
         masks = mask_generator.generate(image)
-    log.info(f"Found {len(masks)} masks.")
+    log.info(f"Found {len(masks)} masks, returning {max_masks}")
     log.debug(f"Masks: {masks}")
-    return masks
+    return masks[:max_masks]
 
 
 def test_model_inference(
@@ -95,21 +95,27 @@ def test_model_inference(
 def process_request(
     request: Dict = None,
     model: Sam = None,
-    max_masks: int = 5,
     **kwargs,
 ):
-    if request is not None and request.get("input_img_path", None) is not None:
+    assert request is not None, "Request must be a dict"
+    assert model is not None, "Must provide a model"
+    if request.get("input_img_path", None) is not None:
+        assert isinstance(request["input_img_path"], str)
+        assert request["input_img_path"].endswith(".png")
         image = np.array(Image.open(request["input_img_path"]))
-        masks = get_masks(image=image, model=model, prompts=None)
-        response = {}
-        for i, mask_dict in enumerate(masks):
-            if i >= max_masks:
-                break
-            # save boolean np array as image file
-            filename = f"data/mask_{i}.png"
-            mask = Image.fromarray(mask_dict['segmentation'])
-            mask.save(filename)
-            response[f"mask_{i}"] = filename
+    elif request.get("input_img", None) is not None:
+        assert isinstance(request["input_img"], str)
+        image = decode_image(request["input_img"])
+    else:
+        raise ValueError("Must provide an input image")
+    masks = get_masks(image=image, model=model, **request)
+    response = {}
+    for i, mask_dict in enumerate(masks):
+        # save boolean np array as image file
+        filename = f"data/mask_{i}.png"
+        mask = Image.fromarray(mask_dict['segmentation'])
+        mask.save(filename)
+        response[f"mask_{i}"] = filename
     return response
 
 

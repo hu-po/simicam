@@ -1,7 +1,7 @@
 import argparse
 import asyncio
 import logging
-from typing import Any
+from typing import Any, Dict, Tuple
 
 import numpy as np
 from omegaconf import OmegaConf
@@ -62,29 +62,17 @@ def test_vae(
     latent = vae_encode(model=model, image=image)
     log.debug(f"Latent shape {latent.shape}")
 
-def load_vae_diffusers(
-    model_weights_path='/workspace/generative-models/checkpoints',
+@time_and_log
+def process_request(
+    request: Dict = None,
+    model: Any = None,
+    **kwargs,
 ):
-    # SEEMS BROKEN, USE LOCAL GIT REPO INSTEAD
-    from diffusers import DiffusionPipeline, StableDiffusionPipeline
-    from diffusers.models import AutoencoderKL
-    vae = AutoencoderKL.from_pretrained("stabilityai/sdxl-vae")
-    # pipe = StableDiffusionPipeline.from_pretrained(model, vae=vae)
-    # pipe = DiffusionPipeline.from_pretrained(
-    #     # "stabilityai/stable-diffusion-xl-base-0.9",
-    #     f"{model_weights_path}/sd_xl_base_0.9.safetensors",
-    #     torch_dtype=torch.float16,
-    #     use_safetensors=True,
-    #     variant="fp16",    
-    #     )
-    # pipe.to(device)
-    # # if using torch < 2.0
-    # pipe.enable_xformers_memory_efficient_attention()
-    # prompt = "An astronaut riding a green horse"
-    # pipe(prompt=prompt).images[0]
-    return vae
-
-
+    assert request is not None
+    assert model is not None
+    response = {}
+    pass
+    return response
 
 if __name__ == "__main__":
     args = args.parse_args()
@@ -94,7 +82,11 @@ if __name__ == "__main__":
     else:
         log.info("Starting SDXL microservice")
         asyncio.run(
-            miniserver(init_func=load_vae, loop_func=process_request)
+            miniserver(
+                ip="0.0.0.0",    
+                init_func=load_vae,
+                loop_func=process_request,
+            )
         )
 
 

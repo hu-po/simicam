@@ -115,8 +115,7 @@ async def miniserver(
 async def miniclient(
     ip: str = "127.0.0.1",
     port: str = "5555",
-    sock_timeout: timedelta = timedelta(seconds=30),
-    recv_timeout: timedelta = timedelta(seconds=1),
+    timeout: timedelta = timedelta(seconds=30),
     request_func: Callable = None,
     **kwargs,
 ) -> Dict:
@@ -125,12 +124,15 @@ async def miniclient(
     socket = context.socket(zmq.REQ)
     socket.connect(f"tcp://{ip}:{port}")
     start_time: datetime = datetime.now()
-    log.info(f"Starting client, socket timeout: {sock_timeout}")
+    log.info(f"Starting client, socket timeout: {timeout}")
     while True:
-        if (datetime.now() - start_time) > sock_timeout:
+        if (datetime.now() - start_time) > timeout:
             log.info("Timeout reached. Closing client.")
             return
-        request: Dict = request_func(**kwargs)
+        try:
+            request: Dict = request_func(**kwargs)
+        except (AssertionError, ValueError) as e:
+            log.warning(f"Invalid request: {e}")
         log.info(f"Sending request: {request}")
         await socket.send_json(json.dumps(request))
         log.info("Waiting for response...")
