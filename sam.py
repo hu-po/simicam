@@ -92,17 +92,24 @@ def test_model_inference(
 
 
 @time_and_log
-async def process_request(
+def process_request(
     request: Dict = None,
     model: Sam = None,
+    max_masks: int = 5,
     **kwargs,
 ):
     if request is not None and request.get("input_img_path", None) is not None:
         image = np.array(Image.open(request["input_img_path"]))
         masks = get_masks(image=image, model=model, prompts=None)
-        response = {
-            "masks": masks,
-        }
+        response = {}
+        for i, mask_dict in enumerate(masks):
+            if i >= max_masks:
+                break
+            # save boolean np array as image file
+            filename = f"data/mask_{i}.png"
+            mask = Image.fromarray(mask_dict['segmentation'])
+            mask.save(filename)
+            response[f"mask_{i}"] = filename
     return response
 
 
@@ -114,5 +121,9 @@ if __name__ == "__main__":
     else:
         log.info("Starting SAM microservice")
         asyncio.run(
-            miniserver(init_func=load_model, loop_func=process_request)
+            miniserver(
+                ip="0.0.0.0",
+                init_func=load_model, 
+                loop_func=process_request,
+            )
         )
