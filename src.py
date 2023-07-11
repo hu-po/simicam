@@ -1,16 +1,19 @@
-import os
+import base64
 import gc
 import json
 import logging
+import os
+import time
 from datetime import datetime, timedelta
 from functools import wraps
-from typing import Callable, Dict
 from pprint import pformat
+from typing import Callable, Dict, Tuple
 
+import numpy as np
 import torch
 import zmq
 import zmq.asyncio
-import time
+
 # import polars as pl
 # from polars.exceptions import NoRowsReturnedError
 
@@ -21,13 +24,13 @@ TIMEOUT: timedelta = timedelta(seconds=30)
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 KEYS_DIR = os.path.join(ROOT_DIR, ".keys")
-DATA_DIR = os.path.join(ROOT_DIR, "data")
 CKPT_DIR = os.path.join(ROOT_DIR, "ckpt")
+LOG_DIR = os.path.join(ROOT_DIR, "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+DATA_DIR = os.path.join(ROOT_DIR, "data")
 os.makedirs(DATA_DIR, exist_ok=True)
 DB_FILENAME: str = f"db{datetime.now().strftime(DATEFORMAT)}.{EMOJI}"
 DB_FILEPATH: str = os.path.join(DATA_DIR, DB_FILENAME)
-LOG_DIR = os.path.join(ROOT_DIR, "logs")
-os.makedirs(LOG_DIR, exist_ok=True)
 
 logging.basicConfig(level=LOG_LEVEL)
 log = logging.getLogger(__name__)
@@ -52,6 +55,7 @@ log.debug(f"LOG_DIR: {LOG_DIR}")
 
 log = logging.getLogger(__name__)
 
+
 def get_device(device: str = None):
     if device is None or device == "gpu" or device.startswith("cuda"):
         if torch.cuda.is_available():
@@ -65,6 +69,7 @@ def get_device(device: str = None):
     print("Using CPU")
     return torch.device("cpu")
 
+
 def time_and_log(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -76,6 +81,7 @@ def time_and_log(func):
         return result
 
     return wrapper
+
 
 async def miniserver(
     ip: str = "127.0.0.1",
@@ -130,6 +136,20 @@ async def miniclient(
         log.info("Waiting for response...")
         response = json.loads(await socket.recv_json())
         log.info(f"Received response: {pformat(response)}")
+
+
+def encode_image(image: np.ndarray) -> str:
+    image_bytes = image.tobytes()
+    image_b64 = base64.b64encode(image_bytes)
+    image_str = image_b64.decode("utf-8")
+    return image_str
+
+
+def decode_image(image_str: str, image_dtype: str, image_shape: Tuple[int, int, int]):
+    image_bytes = base64.b64decode(image_str)
+    image = np.frombuffer(image_bytes, dtype=image_dtype).reshape(image_shape)
+    return image
+
 
 # class MiniDB:
 #     """A tiny database that is secretly a Polars dataframe in a CSV file."""
