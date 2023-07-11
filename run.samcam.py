@@ -1,29 +1,25 @@
 import asyncio
 from datetime import datetime
 import logging
-import cv2
 from src import DATEFORMAT, miniclient
 from camera import start_camera, take_image
+from PIL import Image
 
 log = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     log.info(f"Starting at {datetime.now().strftime(DATEFORMAT)}")
     
-    # camera_data = start_camera()
+    camera_data = start_camera()
 
-    # while True:
-    #     image_data = take_image(**camera_data)
-    #     cv2.imshow("image", image_data["image"])
-    #     cv2.waitKey(1)
-    #     asyncio.run(miniclient(request_func=mock_request))
-
-    def mock_camera():
+    def snapshot():
+        image_data = take_image(**camera_data)
+        image = Image.fromarray(image_data["image"])
+        image.save("data/webcam.png")
         return {
-            "input_img_path": "data/test.png",
+            "input_img_path": "data/webcam.png",
         }
     
-    asyncio.run(miniclient(request_func=mock_camera))
-
+    asyncio.run(miniclient(request_func=snapshot))
 
     log.info(f"Ended at {datetime.now().strftime(DATEFORMAT)}")
