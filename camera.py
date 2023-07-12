@@ -50,6 +50,8 @@ def start_camera(
     return {
         "camera": camera,
         "camera_start_date": datetime.now(),
+        "width": width,
+        "height": height,
     }
 
 
@@ -70,6 +72,8 @@ def take_image(
         return None
     # convert opencv output from BGR to RGB
     image: np.ndarray = image[:, :, [2, 1, 0]]
+    log.debug(f"Image shape: {image.shape}")
+    log.debug(f"Image dtype: {image.dtype}")
     return {
         "image": image,
         "image_timestamp": image_timestamp,

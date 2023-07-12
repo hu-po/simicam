@@ -105,10 +105,14 @@ async def miniserver(
             return
         log.info("Waiting for a request...")
         message = await socket.recv_json()
-        request: Dict = json.loads(message)
-        log.info(f"Received request: {pformat(request)}")
-        response = loop_func(request=request, **_init_output, **kwargs)
-        log.info(f"Sending response: {pformat(response)}")
+        try:
+            request: Dict = json.loads(message)
+            log.info(f"Received request: {pformat(request)}")
+            response = loop_func(request=request, **_init_output, **kwargs)
+            log.info(f"Sending response: {pformat(response)}")
+        except (AssertionError, ValueError) as e:
+            log.warning(f"Invalid request: {e}")
+            response = {"error": f"Invalid request: {e}"}
         await socket.send_json(json.dumps(response))
 
 
@@ -149,7 +153,8 @@ def encode_image(image: np.ndarray) -> str:
 
 def decode_image(image_str: str, image_dtype: str, image_shape: Tuple[int, int, int]):
     image_bytes = base64.b64decode(image_str)
-    image = np.frombuffer(image_bytes, dtype=image_dtype).reshape(image_shape)
+    # image = np.frombuffer(image_bytes, dtype=image_dtype).reshape(image_shape)
+    image = np.frombuffer(image_bytes, dtype=np.uint8).reshape(image_shape)
     return image
 
 

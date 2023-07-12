@@ -30,7 +30,8 @@ docker build \
 
 ```
 export DATA_PATH="/home/oop/dev/simicam/data" \
-export CKPT_PATH="/home/oop/dev/simicam/ckpt"
+export CKPT_PATH="/home/oop/dev/simicam/ckpt" \
+export LOGS_PATH="/home/oop/dev/simicam/logs"
 ```
 
 ```
@@ -40,6 +41,7 @@ docker run \
     --gpus all \
     -v ${DATA_PATH}:/workspace/data \
     -v ${CKPT_PATH}:/workspace/ckpt \
+    -v ${LOGS_PATH}:/workspace/logs \
     simicam/sam \
     bash
 ```
@@ -52,6 +54,7 @@ docker run \
     --gpus all \
     -v ${DATA_PATH}:/workspace/data \
     -v ${CKPT_PATH}:/workspace/ckpt \
+    -v ${LOGS_PATH}:/workspace/logs \
     simicam/sam
 ```
 

@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 import logging
-from src import DATEFORMAT, miniclient
+from src import DATEFORMAT, miniclient, encode_image
 from camera import start_camera, take_image
 from PIL import Image
 
@@ -14,10 +14,12 @@ if __name__ == "__main__":
 
     def snapshot():
         image_data = take_image(**camera_data)
-        image = Image.fromarray(image_data["image"])
-        image.save("data/webcam.png")
+        image_str = encode_image(image_data["image"])
         return {
-            "input_img_path": "data/webcam.png",
+            "img_str": image_str,
+            "img_shape": image_data["image"].shape,
+            # "img_dtype": image_data["image"].dtype,
+            "img_dtype": "uint8",
         }
     
     asyncio.run(miniclient(request_func=snapshot))

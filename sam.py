@@ -99,13 +99,15 @@ def process_request(
 ):
     assert request is not None, "Request must be a dict"
     assert model is not None, "Must provide a model"
-    if request.get("input_img_path", None) is not None:
-        assert isinstance(request["input_img_path"], str)
-        assert request["input_img_path"].endswith(".png")
-        image = np.array(Image.open(request["input_img_path"]))
-    elif request.get("input_img", None) is not None:
-        assert isinstance(request["input_img"], str)
-        image = decode_image(request["input_img"])
+    if request.get("img_path", None) is not None:
+        assert isinstance(request["img_path"], str)
+        assert request["img_path"].endswith(".png")
+        image = np.array(Image.open(request["img_path"]))
+    elif request.get("img_str", None) is not None:
+        assert isinstance(request["img_str"], str)
+        assert request.get("img_shape", None) is not None
+        assert request.get("img_dtype", None) is not None
+        image = decode_image(request["img_str"], request["img_dtype"], request["img_shape"])
     else:
         raise ValueError("Must provide an input image")
     masks = get_masks(image=image, model=model, **request)
