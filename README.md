@@ -47,6 +47,7 @@ docker run \
 ```
 docker run \
     -t \
+    --rm \
     -p 5555:5555 \
     --gpus all \
     -v ${DATA_PATH}:/workspace/data \
