@@ -3,7 +3,6 @@ from datetime import datetime
 import logging
 from src import DATEFORMAT, miniclient, encode_image
 from camera import start_camera, take_image
-from PIL import Image
 
 log = logging.getLogger(__name__)
 
@@ -18,8 +17,6 @@ if __name__ == "__main__":
         return {
             "img_str": image_str,
             "img_shape": image_data["image"].shape,
-            # "img_dtype": image_data["image"].dtype,
-            "img_dtype": "uint8",
         }
     
     asyncio.run(miniclient(request_func=snapshot))

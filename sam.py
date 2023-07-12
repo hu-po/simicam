@@ -106,8 +106,7 @@ def process_request(
     elif request.get("img_str", None) is not None:
         assert isinstance(request["img_str"], str)
         assert request.get("img_shape", None) is not None
-        assert request.get("img_dtype", None) is not None
-        image = decode_image(request["img_str"], request["img_dtype"], request["img_shape"])
+        image = decode_image(request["img_str"], request["img_shape"])
     else:
         raise ValueError("Must provide an input image")
     masks = get_masks(image=image, model=model, **request)

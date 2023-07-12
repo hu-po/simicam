@@ -151,11 +151,13 @@ def encode_image(image: np.ndarray) -> str:
     return image_str
 
 
-def decode_image(image_str: str, image_dtype: str, image_shape: Tuple[int, int, int]):
+def decode_image(
+    image_str: str,
+    image_shape: Tuple[int, int, int],
+    image_dtype: np.dtype = np.uint8,
+) -> np.ndarray:
     image_bytes = base64.b64decode(image_str)
-    # image = np.frombuffer(image_bytes, dtype=image_dtype).reshape(image_shape)
-    image = np.frombuffer(image_bytes, dtype=np.uint8).reshape(image_shape)
-    return image
+    return np.frombuffer(image_bytes, dtype=image_dtype).reshape(image_shape)
 
 
 # class MiniDB:
