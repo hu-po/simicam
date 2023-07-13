@@ -2,6 +2,33 @@
 
 Generative AI for real world video editing
 
+## 13.07.2023
+
+Instal nvidia docker, clone repo into tren computer, copy over ckpt/data/logs
+
+```
+scp -r /home/oop/dev/simicam/ckpt tren@192.168.1.30:/home/tren/dev/simicam 
+scp -r /home/oop/dev/simicam/data tren@192.168.1.30:/home/tren/dev/simicam
+scp -r /home/oop/dev/simicam/logs tren@192.168.1.30:/home/tren/dev/simicam
+```
+
+Run samcam microservice on tren computer
+
+```
+export DATA_PATH="/home/tren/dev/simicam/data" \
+export CKPT_PATH="/home/tren/dev/simicam/ckpt" \
+export LOGS_PATH="/home/tren/dev/simicam/logs"
+docker run \
+    -t \
+    --rm \
+    -p 5555:5555 \
+    --gpus all \
+    -v ${DATA_PATH}:/workspace/data \
+    -v ${CKPT_PATH}:/workspace/ckpt \
+    -v ${LOGS_PATH}:/workspace/logs \
+    simicam/sam
+```
+
 
 ## 11.07.2023
 

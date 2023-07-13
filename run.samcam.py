@@ -19,6 +19,10 @@ if __name__ == "__main__":
             "img_shape": image_data["image"].shape,
         }
     
-    asyncio.run(miniclient(request_func=snapshot))
+    asyncio.run(miniclient(
+            request_func=snapshot,
+            # SAM running on tren computer
+            ip="192.168.1.30",
+        ))
 
     log.info(f"Ended at {datetime.now().strftime(DATEFORMAT)}")
