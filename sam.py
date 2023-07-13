@@ -112,11 +112,11 @@ def process_request(
     masks = get_masks(image=image, model=model, **request)
     response = {}
     for i, mask_dict in enumerate(masks):
-        # save boolean np array as image file
-        filename = f"data/mask_{i}.png"
-        mask = Image.fromarray(mask_dict['segmentation'])
-        mask.save(filename)
-        response[f"mask_{i}"] = filename
+        response[f"mask_{i}"] = {
+            'img': encode_image(mask_dict['segmentation']),
+            'score': mask_dict['score'],
+            # TODO: Centerpoint?
+        }
     return response
 
 

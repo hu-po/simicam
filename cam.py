@@ -7,20 +7,24 @@ ffplay -f v4l2 -framerate 30 -video_size 224x224 -i /dev/video0
 
 """
 
-import asyncio
 import argparse
+import asyncio
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Dict
-from src import miniserver, time_and_log
 
 import cv2
 import numpy as np
 from cv2 import VideoCapture
 
+from src import DATEFORMAT, encode_image, miniclient, miniserver, time_and_log
+
 log = logging.getLogger(__name__)
-args = argparse.ArgumentParser()
-args.add_argument("--test", action="store_true")
+parser = argparse.ArgumentParser()
+parser.add_argument("--test", action="store_true")
+parser.add_argument("--server", action="store_true")
+parser.add_argument("--ip", type=str, default="localhost")
+parser.add_argument("--port", type=int, default=8000)
 
 
 IMAGE_WIDTH = 256
@@ -34,6 +38,7 @@ FPS = 30
 # IMAGE_WIDTH = 1024
 # IMAGE_HEIGHT = 1024
 # FPS = 10
+
 
 @time_and_log
 def start_camera(
@@ -80,6 +85,7 @@ def take_image(
         "image_timedelta": image_timestamp - last_timestamp,
     }
 
+
 def test_camera():
     camera_data = start_camera()
     while True:
@@ -89,12 +95,36 @@ def test_camera():
 
 
 if __name__ == "__main__":
-    args = args.parse_args()
+    args = parser.parse_args()
+    log.info(f"Starting at {datetime.now().strftime(DATEFORMAT)}")
     if args.test:
         log.info("Testing camera locally with opencv")
         test_camera()
-    else:
-        log.info("Starting Camera microservice")
+    elif args.server:
+        log.info(f"Starting Camera Server on {args.ip}")
         asyncio.run(
-            miniserver(init_func=start_camera, loop_func=take_image)
+            miniserver(
+                init_func=start_camera,
+                loop_func=take_image,
+                ip=args.ip,
+            )
         )
+    else:
+        log.info(f"Starting Camera Client on {args.ip}")
+        camera_data = start_camera()
+
+        def snapshot():
+            image_data = take_image(**camera_data)
+            image_str = encode_image(image_data["image"])
+            return {
+                "img_str": image_str,
+                "img_shape": image_data["image"].shape,
+            }
+
+        asyncio.run(
+            miniclient(
+                request_func=snapshot,
+                ip=args.ip,
+            )
+        )
+    log.info(f"Ended at {datetime.now().strftime(DATEFORMAT)}")
