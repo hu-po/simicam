@@ -2,6 +2,20 @@
 
 Generative AI for real world video editing
 
+## Brainstorming
+
+tren:
+- (1070) sam takes in 256x256 and points, returns 5 masks and points
+- (1080) some kind of pose net taking in 256x256, previous pose and returning new pose
+
+oop:
+- camera returns 256x256
+- (3070) sdxl VAE takes in 512x512, returns embedded image
+
+ook:
+- (3090) sdxl base takes in embedded image, masks, poses returns 512x512
+- output 512x512 into obs
+
 ## 13.07.2023
 
 Instal nvidia docker, clone repo into tren computer, copy over ckpt/data/logs
