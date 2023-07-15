@@ -1,0 +1,19 @@
+FROM arm32v7/python:3.9
+RUN pip install --upgrade pip
+RUN pip install \
+    numpy \
+    Pillow \
+    pyzmq \
+    picamera-array \
+    torchvision \
+    timm \
+    https://download.pytorch.org/whl/cpu/torch-1.9.0%2Bcpu-cp39-cp39-linux_armv7l.whl \
+    opencv-python-headless
+
+# Copy the Python scripts
+WORKDIR /workspace
+COPY ./src.py .
+COPY ./cam.py .
+
+# Set the command to run when the container starts
+CMD ["python3", "cam.py", "--server"]
