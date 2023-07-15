@@ -2,6 +2,16 @@
 
 Generative AI for real world video editing
 
+## Future Work
+
+Docker does not work for Windows or rpi or does it?
+https://docs.docker.com/engine/install/raspbian/
+rpi + segmentation service possible side project
+
+windows + nvidia docker doesn't work, can I run pytorch+cuda+sdxl in bare conda environment?
+
+networking setup for rpi + windows + linux boxes
+
 ## Brainstorming
 
 tren:
