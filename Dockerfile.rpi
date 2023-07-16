@@ -3,11 +3,7 @@ RUN pip install --upgrade pip
 RUN pip install \
     numpy \
     Pillow \
-    pyzmq \
-    picamera-array \
-    torchvision \
-    timm \
-    opencv-python-headless
+    pyzmq
 
 # Copy the Python scripts
 WORKDIR /workspace
