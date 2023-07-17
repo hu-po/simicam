@@ -144,6 +144,7 @@ async def miniclient(
         log.info(f"Received response: {pformat(response)}")
 
 
+@time_and_log
 def encode_image(image: np.ndarray) -> str:
     image_bytes = image.tobytes()
     image_b64 = base64.b64encode(image_bytes)
@@ -151,6 +152,7 @@ def encode_image(image: np.ndarray) -> str:
     return image_str
 
 
+@time_and_log
 def decode_image(
     image_str: str,
     image_shape: Tuple[int, int, int],
