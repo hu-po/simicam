@@ -22,7 +22,6 @@ args.add_argument("--test", action="store_true")
 # HACK: Create a model type object from Any
 Sam = Any
 
-
 @time_and_log
 def load_model(
     model: str = "vit_t",
@@ -60,6 +59,41 @@ def get_masks(
     log.debug(f"Masks: {masks}")
     return masks[:max_masks]
 
+def fovea(
+    # point_coords (np.ndarray or None): A Nx2 array of point prompts to the
+    #     model. Each point is in (X,Y) in pixels.
+    point_coords: np.ndarray = None,
+    # point_labels (np.ndarray or None): A length N array of labels for the
+    #     point prompts. 1 indicates a foreground point and 0 indicates a background point.
+    point_labels: np.ndarray = None,
+    # point_scores (np.ndarray or None): A length N array of scores for the
+    #     point prompts. The scores are in [0,1] and indicate the confidence in the segmentation
+    #     at the point. If None, the scores are computed from the point_labels.
+    point_scores: np.ndarray = None,
+    num_points: int = 32,
+    radius: float = 200,
+    rotation: float = 8 * np.pi,
+):
+    if point_coords is None:
+        point_coords = np.zeros((num_points, 2), dtype=np.float32)
+        step = rotation / num_points
+        angles = step * np.arange(num_points)
+        point_coords[:,0] = radius * np.cos(angles)  
+        point_coords[:,1] = radius * np.sin(angles)
+    if point_labels is None:
+        point_labels = np.zeros(num_points, dtype=np.int32)
+        point_labels[:num_points//2] = 1 
+        point_labels[num_points//2:] = 0
+    if point_scores is None:
+        point_scores = np.zeros(num_points, dtype=np.float32)
+    # One gradient step for each point based on knn
+
+    assert point_coords.shape[0] == point_labels.shape[0]
+    return {
+        "point_coords": point_coords,
+        "point_labels": point_labels,
+        "point_scores": point_scores,
+    }
 
 def test_model_inference(
     image_filepath="data/test.png",
