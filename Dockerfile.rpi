@@ -9,6 +9,7 @@ RUN pip install \
 WORKDIR /workspace
 COPY ./src.py .
 COPY ./cam.py .
+COPY ./servo.py .
 
 # Set the command to run when the container starts
 CMD ["python3", "cam.py", "--server"]
