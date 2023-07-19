@@ -1,5 +1,6 @@
 # Start from the pytorch image
-FROM pytorch/pytorch:2.0.0-cuda11.7-cudnn8-runtime
+# FROM pytorch/pytorch:1.8.0-cuda11.7-cudnn8-runtime
+FROM nvcr.io/nvidia/pytorch:23.01-py3
 WORKDIR /
 RUN apt-get update && apt-get install -y git
 RUN git clone https://github.com/facebookresearch/llama.git
