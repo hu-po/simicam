@@ -12,6 +12,9 @@ logs/
 # data
 data/
 
+# sgm repo in windows
+sgm/
+
 # weights
 ckpt/
 *.pt
