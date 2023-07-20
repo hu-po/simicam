@@ -11,4 +11,5 @@ docker run \
     -v ${DATA_PATH}:/workspace/data \
     -v ${CKPT_PATH}:/workspace/ckpt \
     -v ${LOGS_PATH}:/workspace/logs \
-    simicam/rpi
+    simicam/rpi \
+    python3 rpi.py

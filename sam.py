@@ -15,7 +15,7 @@ from PIL import Image
 
 from src import decode_image, encode_image, get_device, miniserver, time_and_log
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('simicam')
 args = argparse.ArgumentParser()
 args.add_argument("--test", action="store_true")
 
@@ -125,7 +125,7 @@ def make_point_labels(
 
 
 @time_and_log
-def test_model_inference(
+def test_sam(
     image_filepath="data/test.png",
 ):
     logging.basicConfig(level=logging.DEBUG)
@@ -210,9 +210,11 @@ def process_request(
 if __name__ == "__main__":
     args = args.parse_args()
     if args.test:
+        log.setLevel(logging.DEBUG)
         log.info("Testing SAM model inference")
-        test_model_inference()
+        test_sam()
     else:
+        log.setLevel(logging.INFO)
         log.info("Starting SAM microservice")
         asyncio.run(
             miniserver(

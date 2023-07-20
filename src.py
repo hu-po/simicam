@@ -33,7 +33,7 @@ DB_FILENAME: str = f"db{datetime.now().strftime(DATEFORMAT)}.{EMOJI}"
 DB_FILEPATH: str = os.path.join(DATA_DIR, DB_FILENAME)
 
 logging.basicConfig(level=LOG_LEVEL)
-log = logging.getLogger(__name__)
+log = logging.getLogger('simicam')
 formatter = logging.Formatter("%(asctime)s|%(message)s")
 # Set up console handler
 ch = logging.StreamHandler()
@@ -53,7 +53,7 @@ log.debug(f"KEYS_DIR: {KEYS_DIR}")
 log.debug(f"DATA_DIR: {DATA_DIR}")
 log.debug(f"LOG_DIR: {LOG_DIR}")
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('simicam')
 
 
 def get_device(device: str = None):

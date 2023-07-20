@@ -12,7 +12,7 @@ from sgm.util import instantiate_from_config, load_safetensors
 
 from src import get_device, miniserver, time_and_log
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('simicam')
 args = argparse.ArgumentParser()
 args.add_argument("--test", action="store_true")
 

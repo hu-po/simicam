@@ -5,12 +5,13 @@ import sys
 import termios
 import time
 import tty
+from typing import List
 
 from dynamixel_sdk import *
 from dynamixel_sdk import COMM_SUCCESS, PacketHandler, PortHandler
+from src import time_and_log
 
-logging.basicConfig(level=logging.INFO)
-log = logging.getLogger(__name__)
+log = logging.getLogger('simicam')
 
 
 class Servo:
@@ -176,3 +177,33 @@ class Servo:
             if not abs(dxl_goal_position - dxl_present_position) > self.dxl_moving_status_threshold:
                 log.debug(f"Servo {self.id} reached {dxl_goal_position}")
                 break
+
+@time_and_log
+def test_servos(
+    servos: List[Servo] = [
+        Servo(
+            id=1,
+            min_pos=869,
+            max_pos=1420,
+        ),
+        Servo(
+            id=2,
+            min_pos=3700,
+            max_pos=4000,
+        ),
+    ]
+):
+    # Copy the port handler and packet handler to the other servos
+    for servo in servos[1:]:
+        servo.portHandler = servos[0].portHandler
+        servo.packetHandler = servos[0].packetHandler
+    # Wiggle the servos
+    for keyframe in [0.0, 1.0, 0.0]:
+        servos[0].move(keyframe)
+        servos[1].move(keyframe)
+        pos_1 = (servos[0].get_position() - servos[0].min_pos) / \
+            (servos[0].max_pos - servos[0].min_pos)
+        pos_2 = (servos[1].get_position() - servos[1].min_pos) / \
+            (servos[1].max_pos - servos[1].min_pos)
+        time.sleep(0.2)
+        log.debug(f"\n Servo 1: {pos_1:.2f}\n Servo 2: {pos_2:.2f}")

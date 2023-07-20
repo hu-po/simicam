@@ -19,7 +19,7 @@ from cv2 import VideoCapture
 
 from src import DATEFORMAT, encode_image, miniclient, miniserver, time_and_log
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('simicam')
 parser = argparse.ArgumentParser()
 parser.add_argument("--test", action="store_true")
 parser.add_argument("--server", action="store_true")
