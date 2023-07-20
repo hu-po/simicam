@@ -13,5 +13,4 @@ docker run \
     -v ${CKPT_PATH}:/workspace/ckpt \
     -v ${LOGS_PATH}:/workspace/logs \
     simicam/sam \
-#     bash
     python3 sam.py --test

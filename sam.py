@@ -13,7 +13,7 @@ import numpy as np
 from mobile_sam import SamAutomaticMaskGenerator, SamPredictor, sam_model_registry
 from PIL import Image
 
-from src import get_device, miniserver, time_and_log, decode_image, encode_image
+from src import decode_image, encode_image, get_device, miniserver, time_and_log
 
 log = logging.getLogger(__name__)
 args = argparse.ArgumentParser()
@@ -21,6 +21,7 @@ args.add_argument("--test", action="store_true")
 
 # HACK: Create a model type object from Any
 Sam = Any
+
 
 @time_and_log
 def load_model(
@@ -36,6 +37,7 @@ def load_model(
     model.to(device=device)
     model.eval()
     return {"model": model, "device": device}
+
 
 @time_and_log
 def get_mask_prompted(
@@ -56,23 +58,25 @@ def get_mask_prompted(
         **prompts,
         multimask_output=True,
     )
-    mask_input = mask_logits[np.argmax(mask_quality)]
+    mask_input: np.ndarray = mask_logits[np.argmax(mask_quality)]
+    mask_input = np.expand_dims(mask_input, axis=0)
     return {
         # mask_input (np.ndarray): A low resolution mask input to the model, typically
         # coming from a previous prediction iteration. Has form 1xHxW, where
         # for SAM, H=W=256.
-        "mask_input" : mask_input, 
+        "mask_input": mask_input,
         # mask (np.ndarray): The output masks in CxHxW format, where C is the
         # number of masks, and (H, W) is the original image size.
-        "mask" : mask, 
+        "mask": mask,
         # mask_quality (np.ndarray): An array of length C containing the model's
         # predictions for the quality of each mask.
-        "mask_quality" : mask_quality, 
+        "mask_quality": mask_quality,
         # masks_logits (np.ndarray): An array of shape CxHxW, where C is the number
         # of masks and H=W=256. These low resolution logits can be passed to
         # a subsequent iteration as mask input.
-        "mask_logits" : mask_logits, 
-    } 
+        "mask_logits": mask_logits,
+    }
+
 
 @time_and_log
 def get_masks(
@@ -87,9 +91,12 @@ def get_masks(
     log.info(f"Found {len(masks)} masks")
     masks = masks[:max_masks]
     log.info(f"Filtered to {len(masks)} masks")
-    masks = sorted(masks, key=lambda x: x['stability_score'], reverse=True)
-    log.info(f"Sorting on score min {masks[-1]['stability_score']} max {masks[0]['stability_score']}")
+    masks = sorted(masks, key=lambda x: x["stability_score"], reverse=True)
+    log.info(
+        f"Sorting on score min {masks[-1]['stability_score']} max {masks[0]['stability_score']}"
+    )
     return {"masks_list": masks}
+
 
 @time_and_log
 def make_pointcoords(
@@ -102,9 +109,10 @@ def make_pointcoords(
     thetas = theta * np.arange(num_points)
     radius = diameter / num_points / 2
     radii = np.linspace(0, radius, num_points)
-    point_coords[:,0] = radii * np.cos(thetas)  
-    point_coords[:,1] = radii * np.sin(thetas)
+    point_coords[:, 0] = radii * np.cos(thetas)
+    point_coords[:, 1] = radii * np.sin(thetas)
     return point_coords
+
 
 @time_and_log
 def make_point_labels(
@@ -112,7 +120,7 @@ def make_point_labels(
     fg_ratio: float = 0.5,
 ) -> np.ndarray:
     point_labels = np.zeros(num_points, dtype=np.int32)
-    point_labels[:int(num_points * fg_ratio)] = 1
+    point_labels[: int(num_points * fg_ratio)] = 1
     return point_labels
 
 
@@ -156,16 +164,17 @@ def test_model_inference(
         **model_data,
     )
 
+
 @time_and_log
 def make_segmap(
     masks_list: List = None,
     **kwargs,
-    ):
-    h, w = masks_list[0]['segmentation'].shape
+):
+    h, w = masks_list[0]["segmentation"].shape
     segmap = np.zeros((h, w), dtype=np.uint8)
     for i, mask in enumerate(masks_list):
-        mask_ids = mask['segmentation'].nonzero()
-        segmap[mask_ids] = i+1
+        mask_ids = mask["segmentation"].nonzero()
+        segmap[mask_ids] = i + 1
     return segmap
 
 
@@ -191,8 +200,8 @@ def process_request(
     response = {}
     for i, mask_dict in enumerate(masks):
         response[f"mask_{i}"] = {
-            'img': encode_image(mask_dict['segmentation']),
-            'score': mask_dict['score'],
+            "img": encode_image(mask_dict["segmentation"]),
+            "score": mask_dict["score"],
             # TODO: Centerpoint?
         }
     return response
@@ -208,7 +217,7 @@ if __name__ == "__main__":
         asyncio.run(
             miniserver(
                 ip="0.0.0.0",
-                init_func=load_model, 
+                init_func=load_model,
                 loop_func=process_request,
             )
         )
