@@ -71,24 +71,27 @@ def fovea(
     #     at the point. If None, the scores are computed from the point_labels.
     point_scores: np.ndarray = None,
     num_points: int = 32,
-    radius: float = 200,
+    diameter: float = 200,
     rotation: float = 8 * np.pi,
+    score_threshold: float = 0.5,
 ):
     if point_coords is None:
         point_coords = np.zeros((num_points, 2), dtype=np.float32)
-        step = rotation / num_points
-        angles = step * np.arange(num_points)
-        point_coords[:,0] = radius * np.cos(angles)  
-        point_coords[:,1] = radius * np.sin(angles)
+        theta = rotation / num_points
+        thetas = theta * np.arange(num_points)
+        radius = diameter / num_points / 2
+        radii = np.linspace(0, radius, num_points)
+        point_coords[:,0] = radii * np.cos(thetas)  
+        point_coords[:,1] = radii * np.sin(thetas)
     if point_labels is None:
         point_labels = np.zeros(num_points, dtype=np.int32)
         point_labels[:num_points//2] = 1 
         point_labels[num_points//2:] = 0
+    assert point_coords.shape[0] == point_labels.shape[0]
     if point_scores is None:
         point_scores = np.zeros(num_points, dtype=np.float32)
-    # One gradient step for each point based on knn
-
-    assert point_coords.shape[0] == point_labels.shape[0]
+    else:
+        point_labels = point_scores > score_threshold
     return {
         "point_coords": point_coords,
         "point_labels": point_labels,
@@ -107,19 +110,11 @@ def test_model_inference(
     log.debug("Testing get masks no prompt")
     _ = get_masks(prompts=None, **model_data)
     log.debug("Testing get masks with point prompt")
+    fovea_data = fovea(num_points=2, diameter=min(image_width, image_height))
     _ = get_masks(
         prompts={
-            # point_coords (np.ndarray or None): A Nx2 array of point prompts to the
-            #     model. Each point is in (X,Y) in pixels.
-            "point_coords": np.array(
-                [
-                    [image_width // 2, image_height // 2],
-                    [image_width // 8, image_height // 8],
-                ]
-            ),
-            # point_labels (np.ndarray or None): A length N array of labels for the
-            #     point prompts. 1 indicates a foreground point and 0 indicates a background point.
-            "point_labels": np.array([1, 0]),
+            "point_coords": fovea_data["point_coords"],
+            "point_labels": fovea_data["point_labels"],
         },
         **model_data,
     )
