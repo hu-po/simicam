@@ -1,6 +1,6 @@
-export DATA_PATH="/home/pi/simicam/data"
-export CKPT_PATH="/home/pi/simicam/ckpt"
-export LOGS_PATH="/home/pi/simicam/logs"
+export DATA_PATH="/home/oop/dev/simicam/data"
+export CKPT_PATH="/home/oop/dev/simicam/ckpt"
+export LOGS_PATH="/home/oop/dev/simicam/logs"
 docker build \
      -t "simicam/llama-13b" \
      -f Dockerfile.llama .

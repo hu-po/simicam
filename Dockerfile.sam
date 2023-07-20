@@ -12,4 +12,3 @@ RUN python setup.py install
 COPY ./sam.py /workspace
 COPY ./src.py /workspace
 WORKDIR /workspace
-CMD ["python3", "sam.py"]
