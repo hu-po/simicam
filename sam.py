@@ -4,20 +4,17 @@ https://github.com/chaoningzhang/mobilesam#installation
 
 """
 
-import argparse
-import asyncio
 import logging
 from typing import Any, Dict, List
 
 import numpy as np
-from mobile_sam import SamAutomaticMaskGenerator, SamPredictor, sam_model_registry
+from mobile_sam import (SamAutomaticMaskGenerator, SamPredictor,
+                        sam_model_registry)
 from PIL import Image
 
-from src import decode_image, encode_image, get_device, miniserver, time_and_log
+from src import decode_image, encode_image, get_device, time_and_log
 
-log = logging.getLogger('simicam')
-args = argparse.ArgumentParser()
-args.add_argument("--test", action="store_true")
+log = logging.getLogger("simicam")
 
 # HACK: Create a model type object from Any
 Sam = Any
@@ -99,6 +96,19 @@ def get_masks(
 
 
 @time_and_log
+def make_segmap(
+    masks_list: List = None,
+    **kwargs,
+):
+    h, w = masks_list[0]["segmentation"].shape
+    segmap = np.zeros((h, w), dtype=np.uint8)
+    for i, mask in enumerate(masks_list):
+        mask_ids = mask["segmentation"].nonzero()
+        segmap[mask_ids] = i + 1
+    return segmap
+
+
+@time_and_log
 def make_pointcoords(
     num_points: int = 32,
     diameter: float = 256,
@@ -166,19 +176,6 @@ def test_sam(
 
 
 @time_and_log
-def make_segmap(
-    masks_list: List = None,
-    **kwargs,
-):
-    h, w = masks_list[0]["segmentation"].shape
-    segmap = np.zeros((h, w), dtype=np.uint8)
-    for i, mask in enumerate(masks_list):
-        mask_ids = mask["segmentation"].nonzero()
-        segmap[mask_ids] = i + 1
-    return segmap
-
-
-@time_and_log
 def process_request(
     request: Dict = None,
     model: Sam = None,
@@ -208,18 +205,5 @@ def process_request(
 
 
 if __name__ == "__main__":
-    args = args.parse_args()
-    if args.test:
-        log.setLevel(logging.DEBUG)
-        log.info("Testing SAM model inference")
-        test_sam()
-    else:
-        log.setLevel(logging.INFO)
-        log.info("Starting SAM microservice")
-        asyncio.run(
-            miniserver(
-                ip="0.0.0.0",
-                init_func=load_model,
-                loop_func=process_request,
-            )
-        )
+    log.setLevel(logging.DEBUG)
+    test_sam()
