@@ -14,8 +14,8 @@ from datetime import datetime
 from typing import Dict
 
 import cv2
-import numpy as np
 from cv2 import VideoCapture
+import numpy as np
 
 from src import DATEFORMAT, encode_image, miniclient, miniserver, time_and_log
 
@@ -27,24 +27,11 @@ parser.add_argument("--ip", type=str, default="localhost")
 parser.add_argument("--port", type=int, default=8000)
 
 
-IMAGE_WIDTH = 256
-IMAGE_HEIGHT = 256
-FPS = 30
-
-# IMAGE_WIDTH = 512
-# IMAGE_HEIGHT = 512
-# FPS = 30
-
-# IMAGE_WIDTH = 1024
-# IMAGE_HEIGHT = 1024
-# FPS = 10
-
-
 @time_and_log
 def start_camera(
-    width: int = IMAGE_WIDTH,
-    height: int = IMAGE_HEIGHT,
-    fps: int = FPS,
+    width: int = 256,
+    height: int = 256,
+    fps: int = 30,
     **kwargs,
 ) -> Dict:
     log.info(f"Starting video capture at {width}x{height} @ {fps}fps")
