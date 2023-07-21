@@ -1,30 +1,19 @@
-""" Camera code. 
-
+""" 
 Check your camera is working with:
 
 v4l2-ctl --list-devices
 ffplay -f v4l2 -framerate 30 -video_size 224x224 -i /dev/video0
-
 """
 
-import argparse
-import asyncio
 import logging
 from datetime import datetime
 from typing import Dict
 
 import cv2
-from cv2 import VideoCapture
 import numpy as np
+from src import time_and_log
 
-from src import DATEFORMAT, encode_image, miniclient, miniserver, time_and_log
-
-log = logging.getLogger('simicam')
-parser = argparse.ArgumentParser()
-parser.add_argument("--test", action="store_true")
-parser.add_argument("--server", action="store_true")
-parser.add_argument("--ip", type=str, default="localhost")
-parser.add_argument("--port", type=int, default=8000)
+log = logging.getLogger("simicam")
 
 
 @time_and_log
@@ -35,7 +24,7 @@ def start_camera(
     **kwargs,
 ) -> Dict:
     log.info(f"Starting video capture at {width}x{height} @ {fps}fps")
-    camera: VideoCapture = cv2.VideoCapture(0, cv2.CAP_V4L2)
+    camera: cv2.VideoCapture = cv2.VideoCapture(0, cv2.CAP_V4L2)
     camera.set(cv2.CAP_PROP_FRAME_WIDTH, width)
     camera.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
     camera.set(cv2.CAP_PROP_FPS, fps)
@@ -49,7 +38,7 @@ def start_camera(
 
 @time_and_log
 def take_image(
-    camera: VideoCapture = None,
+    camera: cv2.VideoCapture = None,
     last_timestamp: datetime = None,
     **kwargs,
 ) -> Dict:
@@ -74,44 +63,14 @@ def take_image(
 
 
 def test_camera():
+    log.info("Testing camera locally with opencv")
     camera_data = start_camera()
-    while True:
+    for _ in range(10):
         image_data = take_image(**camera_data)
-        cv2.imshow("image", image_data["image"])
-        cv2.waitKey(1)
+    cv2.imshow("image", image_data["image"])
+    cv2.waitKey(1)
 
 
 if __name__ == "__main__":
-    args = parser.parse_args()
-    log.info(f"Starting at {datetime.now().strftime(DATEFORMAT)}")
-    if args.test:
-        log.info("Testing camera locally with opencv")
-        test_camera()
-    elif args.server:
-        log.info(f"Starting Camera Server on {args.ip}")
-        asyncio.run(
-            miniserver(
-                init_func=start_camera,
-                loop_func=take_image,
-                ip=args.ip,
-            )
-        )
-    else:
-        log.info(f"Starting Camera Client on {args.ip}")
-        camera_data = start_camera()
-
-        def snapshot():
-            image_data = take_image(**camera_data)
-            image_str = encode_image(image_data["image"])
-            return {
-                "img_str": image_str,
-                "img_shape": image_data["image"].shape,
-            }
-
-        asyncio.run(
-            miniclient(
-                request_func=snapshot,
-                ip=args.ip,
-            )
-        )
-    log.info(f"Ended at {datetime.now().strftime(DATEFORMAT)}")
+    log.setLevel(logging.DEBUG)
+    test_camera()

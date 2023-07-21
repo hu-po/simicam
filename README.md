@@ -12,4 +12,3 @@ Distributed AI camera system for real time image manipulation.
   url={https://github.com/hu-po/simicam}
 }
 ```
-

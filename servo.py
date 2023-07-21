@@ -102,6 +102,7 @@ class Servo:
 
         log.info("Servo communication started")
 
+    @time_and_log
     def enable_torque(self):
         # Enable Dynamixel Torque
         dxl_comm_result, dxl_error = self.packetHandler.write1ByteTxRx(
@@ -114,6 +115,7 @@ class Servo:
             log.info(f"Servo {self.id} torque enabled")
         self.torque_enabled = True
 
+    @time_and_log
     def disable_torque(self):
         # Disable Dynamixel Torque
         dxl_comm_result, dxl_error = self.packetHandler.write1ByteTxRx(
@@ -129,6 +131,7 @@ class Servo:
     def __del__(self):
         self.disable_torque()
 
+    @time_and_log
     def get_position(self):
         """ Get servo position. """
         dxl_present_position, dxl_comm_result, dxl_error = self.packetHandler.read4ByteTxRx(
@@ -139,6 +142,7 @@ class Servo:
             log.error("%s" % self.packetHandler.getRxPacketError(dxl_error))
         return dxl_present_position
 
+    @time_and_log
     def move(self, position):
         """ Move servo to position. """
         assert 0 <= position <= 1, "Position must be between 0 and 1"
@@ -207,3 +211,7 @@ def test_servos(
             (servos[1].max_pos - servos[1].min_pos)
         time.sleep(0.2)
         log.debug(f"\n Servo 1: {pos_1:.2f}\n Servo 2: {pos_2:.2f}")
+
+if __name__ == "__main__":
+    log.setLevel(logging.DEBUG)
+    test_servos()

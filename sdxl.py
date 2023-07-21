@@ -1,5 +1,10 @@
-import argparse
-import asyncio
+"""
+Stable Diffusion XL
+
+https://github.com/Stability-AI/generative-models
+
+"""
+
 import logging
 from typing import Any, Dict, Tuple
 
@@ -10,12 +15,11 @@ import sgm
 from sgm.models.autoencoder import AutoencoderKLInferenceWrapper
 from sgm.util import instantiate_from_config, load_safetensors
 
-from src import get_device, miniserver, time_and_log
+from src import get_device, time_and_log
 
 log = logging.getLogger('simicam')
-args = argparse.ArgumentParser()
-args.add_argument("--test", action="store_true")
 
+@time_and_log
 def load_vae(
     config: str = '/workspace/generative-models/checkpoints/sdxl_vae.yaml',
     ckpt: str = '/workspace/generative-models/checkpoints/sdxl_vae.safetensors',
@@ -62,32 +66,9 @@ def test_vae(
     latent = vae_encode(model=model, image=image)
     log.debug(f"Latent shape {latent.shape}")
 
-@time_and_log
-def process_request(
-    request: Dict = None,
-    model: Any = None,
-    **kwargs,
-):
-    assert request is not None
-    assert model is not None
-    response = {}
-    pass
-    return response
 
 if __name__ == "__main__":
-    args = args.parse_args()
-    if args.test:
-        log.info("Testing SDXL")
-        test_vae()
-    else:
-        log.info("Starting SDXL microservice")
-        asyncio.run(
-            miniserver(
-                ip="0.0.0.0",    
-                init_func=load_vae,
-                loop_func=process_request,
-            )
-        )
-
-
+    log.setLevel(logging.DEBUG)
+    log.info("Testing SDXL")
+    test_vae()
 
