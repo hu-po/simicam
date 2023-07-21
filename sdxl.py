@@ -26,10 +26,10 @@ def load_vae(
     verbose: bool = False,
     device: str = "gpu",
 ):
-    _ = get_device("gpu")
+    device = get_device(device)
     config = OmegaConf.load(config)
     model = instantiate_from_config(config.model)
-    sd = load_safetensors(ckpt, device=device)
+    sd = load_safetensors(ckpt, device=0) # HACK: hardcoded GPU device
     m, u = model.load_state_dict(sd, strict=False)
     if len(m) > 0 and verbose:
         print("missing keys:")
@@ -61,6 +61,7 @@ def test_vae(
         ckpt='./ckpt/sdxl_vae.safetensors',
     )
     image = np.array(Image.open(image_filepath))
+    image = np.expand_dims(image, axis=0)
     log.debug(f"Image shape {image.shape}")
     log.debug("Testing Encode")
     latent = vae_encode(model=model, image=image)
