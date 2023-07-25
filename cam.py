@@ -2,7 +2,9 @@
 Check your camera is working with:
 
 v4l2-ctl --list-devices
-ffplay -f v4l2 -framerate 30 -video_size 224x224 -i /dev/video0
+ffplay -f v4l2 -framerate 30 -video_size 256x256 -i /dev/video0
+ffmpeg -y  -f v4l2 -r 30 -i -video_size 256x256 /dev/video0 out.mp4
+
 """
 
 import logging
@@ -40,8 +42,11 @@ def start_camera(
 def take_image(
     camera: cv2.VideoCapture = None,
     last_timestamp: datetime = None,
+    vflip: bool = True,
     **kwargs,
 ) -> Dict:
+    if camera is None:
+        camera = start_camera(**kwargs)["camera"]
     image_timestamp = datetime.now()
     last_timestamp = last_timestamp or image_timestamp
     log.info(f"Taking image at {image_timestamp}")
@@ -53,6 +58,9 @@ def take_image(
         return None
     # convert opencv output from BGR to RGB
     image: np.ndarray = image[:, :, [2, 1, 0]]
+    if vflip:
+        log.debug("Flipping image vertically")
+        image = np.flip(image, axis=0)
     log.debug(f"Image shape: {image.shape}")
     log.debug(f"Image dtype: {image.dtype}")
     return {
