@@ -13,20 +13,19 @@ from typing import Dict
 
 import cv2
 import numpy as np
-from src import time_and_log
 
 log = logging.getLogger("simicam")
 
 
-@time_and_log
 def start_camera(
+    idx: int = 0,
     width: int = 256,
     height: int = 256,
     fps: int = 30,
     **kwargs,
 ) -> Dict:
     log.info(f"Starting video capture at {width}x{height} @ {fps}fps")
-    camera: cv2.VideoCapture = cv2.VideoCapture(0, cv2.CAP_V4L2)
+    camera: cv2.VideoCapture = cv2.VideoCapture(idx, cv2.CAP_V4L2)
     camera.set(cv2.CAP_PROP_FRAME_WIDTH, width)
     camera.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
     camera.set(cv2.CAP_PROP_FPS, fps)
@@ -38,7 +37,6 @@ def start_camera(
     }
 
 
-@time_and_log
 def take_image(
     camera: cv2.VideoCapture = None,
     last_timestamp: datetime = None,
@@ -70,15 +68,26 @@ def take_image(
     }
 
 
-def test_camera():
-    log.info("Testing camera locally with opencv")
+def test_camera_viz():
     camera_data = start_camera()
     for _ in range(10):
         image_data = take_image(**camera_data)
-    cv2.imshow("image", image_data["image"])
-    cv2.waitKey(1)
+        cv2.imshow("image", image_data["image"])
+        cv2.waitKey(1)
+
+
+def test_camera_profile():
+    import cProfile
+    import pstats
+
+    cProfile.run("camera_data = start_camera()", "profile")
+    pstats.Stats("profile").print_stats()
+
+    cProfile.run("take_image(**camera_data)", "profile", sort="percall")
+    pstats.Stats("profile").print_stats()
 
 
 if __name__ == "__main__":
     log.setLevel(logging.DEBUG)
-    test_camera()
+    test_camera_viz()
+    test_camera_profile()

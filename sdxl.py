@@ -61,7 +61,7 @@ def test_vae(
         ckpt='./ckpt/sdxl_vae.safetensors',
     )
     image = np.array(Image.open(image_filepath))
-    image = np.expand_dims(image, axis=0)
+    # image = np.expand_dims(image, axis=0)
     log.debug(f"Image shape {image.shape}")
     log.debug("Testing Encode")
     latent = vae_encode(model=model, image=image)
