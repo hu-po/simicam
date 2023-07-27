@@ -12,4 +12,4 @@ docker run \
     -v ${CKPT_PATH}:/workspace/ckpt \
     -v ${LOGS_PATH}:/workspace/logs \
     simicam/rpi \
-    python3 rpi.py --test
+    python3 cam.py
