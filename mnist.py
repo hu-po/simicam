@@ -4,7 +4,6 @@ docker run -it \
     -v /home/oop/dev/simicam:/workspace/simicam \
     pytorch/pytorch:2.0.0-cuda11.7-cudnn8-runtime
 """
-
 # Import necessary libraries
 import torch
 import torch.nn as nn
@@ -51,11 +50,9 @@ optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # Train the model
 epochs = 10
-train_loss_list = []
-test_loss_list = []
+test_accuracy_list = []
 
 for epoch in range(epochs):
-    train_loss = 0.0
     for images, labels in train_loader:
         images, labels = images.to(device), labels.to(device)
         optimizer.zero_grad()
@@ -63,29 +60,27 @@ for epoch in range(epochs):
         loss = criterion(output, labels)
         loss.backward()
         optimizer.step()
-        train_loss += loss.item()
         
-    # Validation loss
-    test_loss = 0.0
+    # Test accuracy
+    correct = 0
+    total = 0
     with torch.no_grad():
         for images, labels in test_loader:
             images, labels = images.to(device), labels.to(device)
             output = model(images)
-            loss = criterion(output, labels)
-            test_loss += loss.item()
+            _, predicted = torch.max(output.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
 
-    train_loss = train_loss / len(train_loader)
-    test_loss = test_loss / len(test_loader)
+    test_accuracy = 100 * correct / total
+    test_accuracy_list.append(test_accuracy)
+    print(f"Epoch {epoch+1}, Test Accuracy: {test_accuracy}")
 
-    train_loss_list.append(train_loss)
-    test_loss_list.append(test_loss)
-    print(f"Epoch {epoch+1}, Train Loss: {train_loss}, Test Loss: {test_loss}")
-
-# Plotting training and validation loss
+# Plotting test accuracy
 plt.figure(figsize=(10, 5))
-plt.plot(train_loss_list, label='Training Loss')
-plt.plot(test_loss_list, label='Validation Loss')
+plt.plot(test_accuracy_list, label='Test Accuracy')
 plt.xlabel('Epochs')
-plt.ylabel('Loss')
+plt.ylabel('Accuracy (%)')
 plt.legend()
 plt.show()
+
