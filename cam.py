@@ -5,6 +5,18 @@ v4l2-ctl --list-devices
 ffplay -f v4l2 -framerate 30 -video_size 256x256 -i /dev/video0
 ffmpeg -y  -f v4l2 -r 30 -i /dev/video0 out.mp4
 
+# 4k
+ffplay -f v4l2 -framerate 60 -video_size 3840x2160 -i /dev/video0
+ffmpeg -y -f v4l2 -r 60 -video_size 3840x2160 -i /dev/video0 out.mp4
+
+vertical flip
+ffplay -f v4l2 -framerate 60 -video_size 3840x2160 -vf "vflip" -i /dev/video0
+ffmpeg -y -f v4l2 -r 60 -video_size 3840x2160 -vf "vflip" -i /dev/video0 out.mp4
+
+30fps 2k
+ffplay -f v4l2 -framerate 30 -video_size 2048x1080 -vf "vflip" -i /dev/video0
+ffmpeg -y -f v4l2 -r 30 -video_size 2048x1080 -vf "vflip" -i /dev/video0 out.mp4
+
 """
 
 import logging
