@@ -15,7 +15,7 @@ ffmpeg -y -f v4l2 -r 60 -video_size 3840x2160 -vf "vflip" -i /dev/video0 out.mp4
 
 30fps 2k
 ffplay -f v4l2 -framerate 30 -video_size 2048x1080 -vf "vflip" -i /dev/video0
-ffmpeg -y -f v4l2 -r 30 -video_size 2048x1080 -vf "vflip" -i /dev/video0 out.mp4
+ffmpeg -y -f v4l2 -r 30 -video_size 2048x1080 -i /dev/video0 -vf "vflip" out.mp4
 
 """
 
