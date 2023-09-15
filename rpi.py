@@ -3,7 +3,7 @@ import logging
 from typing import Dict
 
 from servo import test_servos
-from cam import test_camera
+from cv2_cam import test_camera
 
 log = logging.getLogger('simicam')
 args = argparse.ArgumentParser()
