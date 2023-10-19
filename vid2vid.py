@@ -33,17 +33,55 @@ def nuke_docker():
     os.system("docker container prune -f")
 
 
+def crop_center_square(input_video_path):
+    # Get video details using ffprobe
+    cmd = [
+        "ffprobe",
+        "-v", "error",
+        "-select_streams", "v:0",
+        "-show_entries", "stream=width,height,r_frame_rate",
+        "-of", "csv=p=0",
+        input_video_path
+    ]
+    output = subprocess.check_output(cmd).decode("utf-8").strip().split(',')
+    width, height, framerate = [int(output[0]), int(output[1]), output[2].split('/')[0]]
+    min_dim = min(width, height)
+
+    # Calculate the offset for cropping
+    x_offset = (width - min_dim) // 2
+    y_offset = (height - min_dim) // 2
+
+    # Set output file name
+    output_video_path = f"test.square.30fps.{min_dim}x{min_dim}.mp4"
+
+    # Use ffmpeg to crop the video
+    cmd = [
+        "ffmpeg",
+        "-i", input_video_path,
+        "-vf", f"crop={min_dim}:{min_dim}:{x_offset}:{y_offset}",
+        "-c:v", "libx264",
+        "-r", "30",
+        output_video_path
+    ]
+    subprocess.call(cmd)
+
+    print(f"Video cropped and saved to: {output_video_path}")
+
+
 def process_video_frames(
-    input_video_path="/home/oop/dev/simicam/data/test.mp4",
+    input_video_path="/home/oop/dev/simicam/data/test.square.30fps.1080x1080.mp4",
+    base_output_dir="/home/oop/dev/simicam/logs/",
+    output_video_filename="output.mp4",
+    prompt:str = "humanoid robot dancing test, unreal engine, 8k render",
+    fps:int=30,
     docker_url="http://localhost:5000/predictions",
-    base_output_dir="/home/oop/dev/simicam/logs",
-    fps=30,
+    **kwargs,
 ):
     # Generate a unique id for this generation session
-    session_id = uuid.uuid4()
+    session_id = str(uuid.uuid4())[:6]
 
     # Create a output folder for the session id and use that as the output dir
-    output_dir = os.path.join(base_output_dir, str(session_id))
+    output_dir = os.path.join(base_output_dir, session_id)
     os.makedirs(output_dir, exist_ok=True)
 
     # Extract frames from video using ffmpeg
@@ -65,7 +103,7 @@ def process_video_frames(
                 json={
                     "input": {
                         "image": f"data:image/png;base64,{base64.b64encode(img_file.read()).decode('utf-8')}",
-                        "prompt": "an astronaut on the moon, digital art",
+                        "prompt": prompt,
                     },
                 },
             )
@@ -113,10 +151,29 @@ def process_video_frames(
 
     # Combine frames into video
     os.system(
-        f"ffmpeg -framerate {fps} -i {output_dir}/nobg_%05d.png -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p {output_dir}/output.mp4"
+        f"ffmpeg -framerate {fps} -i {output_dir}/nobg_%05d.png -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p {base_output_dir}/{output_video_filename}"
     )
 
 
 if __name__ == "__main__":
-    process_video_frames()
+    # Define the values you want to try for fps and prompt
+    fps_values = [1, 2] # 24, 30, 60]
+    prompt_values = [
+        "humanoid robot dancing test, unreal engine, 8k render",
+        "shaman eagle dance, totem poles, moebius style",
+    ]
 
+    # Iterate over all combinations of fps and prompt values
+    for fps in fps_values:
+        for prompt in prompt_values:
+            process_video_frames(
+                input_video_path="/home/oop/dev/simicam/data/test.square.30fps.1080x1080.mp4",
+                base_output_dir="/home/oop/dev/simicam/logs/",
+                output_video_filename=f"output_{fps}_{prompt[:5]}.mp4",
+                prompt=prompt,
+                fps=fps,
+                docker_url="http://localhost:5000/predictions",
+            )
+
+    # Call the function with your video path
+    # crop_center_square("/home/oop/Downloads/PXL_20231019_175956589.TS.mp4")
