@@ -4,17 +4,13 @@ conda activate vid2vid
 pip install moviepy requests replicate
 
 # https://replicate.com/jagilley/controlnet-pose
-docker run -p 5000:5000 \
-    --name controlnet_container \
-    --gpus=all r8.im/jagilley/controlnet-pose@sha256:0304f7f774ba7341ef754231f794b1ba3d129e3c46af3022241325ae0c50fb99
+docker run --name controlnet_container r8.im/jagilley/controlnet-pose@sha256:0304f7f774ba7341ef754231f794b1ba3d129e3c46af3022241325ae0c50fb99
 docker commit controlnet_container controlnet_container
 
 
 
 # https://replicate.com/cjwbw/rembg
-docker run -d -p 5000:5000 \
-    --name bgremoval_container \
-    --gpus=all r8.im/cjwbw/rembg@sha256:fb8af171cfa1616ddcf1242c093f9c46bcada5ad4cf6f2fbe8b81b330ec5c003
+docker run --name bgremoval_container r8.im/cjwbw/rembg@sha256:fb8af171cfa1616ddcf1242c093f9c46bcada5ad4cf6f2fbe8b81b330ec5c003
 docker commit bgremoval_container bgremoval_container
 """
 
@@ -24,6 +20,7 @@ import os
 import subprocess
 import urllib.request
 import uuid
+import time
 from io import BytesIO
 
 import requests
@@ -45,10 +42,11 @@ def process_video_frames(
     # Extract frames from video using ffmpeg
     os.system(f"ffmpeg -i {input_video_path} -vf fps=1 {output_dir}/raw_%05d.png")
 
-    # Run the controlnet docker container
+    # Run the controlnet docker container and remove it after use
     docker_process = subprocess.Popen(
-        "docker run -d -p 5000:5000 --gpus=all controlnet_container"
+        ["docker", "run", "--rm", "-p", "5000:5000", "--gpus=all", "controlnet_container"]
     )
+    time.sleep(20) # Let the docker container startup
 
     # Feed each frame to the controlnet docker container and save the output image
     for i, frame_path in enumerate(glob.glob(os.path.join(output_dir, "raw_*.png"))):
@@ -60,12 +58,12 @@ def process_video_frames(
                     "input": {
                         "image": f"data:image/png;base64,{base64.b64encode(img_file.read()).decode('utf-8')}",
                         "prompt": "an astronaut on the moon, digital art",
-                        "a_prompt": "best quality, extremely detailed",
-                        "n_prompt": "longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality",
-                        "ddim_steps": 20,
-                        "num_samples": "1",
-                        "image_resolution": "512",
-                        "detect_resolution": 512,
+                        # "a_prompt": "best quality, extremely detailed",
+                        # "n_prompt": "longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality",
+                        # "ddim_steps": 20,
+                        # "num_samples": "1",
+                        # "image_resolution": "512",
+                        # "detect_resolution": 512,
                     },
                 },
             )
@@ -84,8 +82,9 @@ def process_video_frames(
 
     # Run the bgremoval docker container
     docker_process = subprocess.Popen(
-        "docker run -d -p 5000:5000 --gpus=all bgremoval_container"
+        ["docker", "run", "--rm",  "-p", "5000:5000", "--gpus=all", "bgremoval_container"]
     )
+    time.sleep(10) # Let the docker container startup
 
     # Feed each frame to the bgremoval docker container
     for i, frame_path in enumerate(
