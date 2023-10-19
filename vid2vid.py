@@ -1,7 +1,6 @@
 """
 conda create -n vid2vid python=3.9
 conda activate vid2vid
-pip install moviepy requests replicate
 
 # https://replicate.com/jagilley/controlnet-pose
 docker run --name controlnet_container r8.im/jagilley/controlnet-pose@sha256:0304f7f774ba7341ef754231f794b1ba3d129e3c46af3022241325ae0c50fb99
@@ -18,7 +17,6 @@ import base64
 import glob
 import os
 import subprocess
-import urllib.request
 import uuid
 import time
 from io import BytesIO
@@ -26,11 +24,20 @@ from io import BytesIO
 import requests
 from PIL import Image
 
+def nuke_docker():
+    containers = os.popen("docker ps -aq").read().strip()
+    if containers:
+        os.system(f"docker kill {containers}")
+        os.system(f"docker stop {containers}")
+        os.system(f"docker rm {containers}")
+    os.system("docker container prune -f")
+
 
 def process_video_frames(
     input_video_path="/home/oop/dev/simicam/data/test.mp4",
     docker_url="http://localhost:5000/predictions",
     base_output_dir="/home/oop/dev/simicam/logs",
+    fps=30,
 ):
     # Generate a unique id for this generation session
     session_id = uuid.uuid4()
@@ -40,13 +47,14 @@ def process_video_frames(
     os.makedirs(output_dir, exist_ok=True)
 
     # Extract frames from video using ffmpeg
-    os.system(f"ffmpeg -i {input_video_path} -vf fps=1 {output_dir}/raw_%05d.png")
+    os.system(f"ffmpeg -i {input_video_path} -vf fps={fps} {output_dir}/raw_%05d.png")
 
     # Run the controlnet docker container and remove it after use
+    nuke_docker()
     docker_process = subprocess.Popen(
         ["docker", "run", "--rm", "-p", "5000:5000", "--gpus=all", "controlnet_container"]
     )
-    time.sleep(20) # Let the docker container startup
+    time.sleep(30) # Let the docker container startup
 
     # Feed each frame to the controlnet docker container and save the output image
     for i, frame_path in enumerate(glob.glob(os.path.join(output_dir, "raw_*.png"))):
@@ -58,12 +66,6 @@ def process_video_frames(
                     "input": {
                         "image": f"data:image/png;base64,{base64.b64encode(img_file.read()).decode('utf-8')}",
                         "prompt": "an astronaut on the moon, digital art",
-                        # "a_prompt": "best quality, extremely detailed",
-                        # "n_prompt": "longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality",
-                        # "ddim_steps": 20,
-                        # "num_samples": "1",
-                        # "image_resolution": "512",
-                        # "detect_resolution": 512,
                     },
                 },
             )
@@ -78,13 +80,13 @@ def process_video_frames(
 
     # Kill controlnet docker container
     docker_process.terminate()
-    os.system("docker kill $(docker ps -q)")
 
     # Run the bgremoval docker container
+    nuke_docker()
     docker_process = subprocess.Popen(
         ["docker", "run", "--rm",  "-p", "5000:5000", "--gpus=all", "bgremoval_container"]
     )
-    time.sleep(10) # Let the docker container startup
+    time.sleep(20) # Let the docker container startup
 
     # Feed each frame to the bgremoval docker container
     for i, frame_path in enumerate(
@@ -101,7 +103,7 @@ def process_video_frames(
                 },
             )
         img = Image.open(
-            BytesIO(base64.b64decode(response.json()["output"][0].split(",")[1]))
+            BytesIO(base64.b64decode(response.json()["output"].split(",")[1]))
         )
         img.save(os.path.join(output_dir, f"nobg_{i:05}.png"))
 
@@ -111,9 +113,10 @@ def process_video_frames(
 
     # Combine frames into video
     os.system(
-        f"ffmpeg -framerate 30 -i {output_dir}/nobg_%05d.png -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p {output_dir}/output.mp4"
+        f"ffmpeg -framerate {fps} -i {output_dir}/nobg_%05d.png -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p {output_dir}/output.mp4"
     )
 
 
 if __name__ == "__main__":
     process_video_frames()
+
