@@ -131,6 +131,7 @@ def process_video_frames(
                     "input": {
                         "image": f"data:image/png;base64,{base64.b64encode(img_file.read()).decode('utf-8')}",
                         "prompt": prompt,
+                        "seed": 42,
                     },
                 },
             )
@@ -195,8 +196,7 @@ def process_video_frames(
 
 if __name__ == "__main__":
     # Define the values you want to try for fps and prompt
-    # fps_values = [10, 30, 60]
-    fps_values = [1]
+    fps_values = [1, 30] #, 60]
     prompt_values = [
         "robot, battle droid, unreal engine",
         "shaman world of warcraft, mmo",
