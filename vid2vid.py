@@ -24,6 +24,7 @@ from io import BytesIO
 import requests
 from PIL import Image
 
+
 def nuke_docker():
     containers = os.popen("docker ps -aq").read().strip()
     if containers:
@@ -37,14 +38,18 @@ def crop_center_square(input_video_path):
     # Get video details using ffprobe
     cmd = [
         "ffprobe",
-        "-v", "error",
-        "-select_streams", "v:0",
-        "-show_entries", "stream=width,height,r_frame_rate",
-        "-of", "csv=p=0",
-        input_video_path
+        "-v",
+        "error",
+        "-select_streams",
+        "v:0",
+        "-show_entries",
+        "stream=width,height,r_frame_rate",
+        "-of",
+        "csv=p=0",
+        input_video_path,
     ]
-    output = subprocess.check_output(cmd).decode("utf-8").strip().split(',')
-    width, height, framerate = [int(output[0]), int(output[1]), output[2].split('/')[0]]
+    output = subprocess.check_output(cmd).decode("utf-8").strip().split(",")
+    width, height, framerate = [int(output[0]), int(output[1]), output[2].split("/")[0]]
     min_dim = min(width, height)
 
     # Calculate the offset for cropping
@@ -57,24 +62,34 @@ def crop_center_square(input_video_path):
     # Use ffmpeg to crop the video
     cmd = [
         "ffmpeg",
-        "-i", input_video_path,
-        "-vf", f"crop={min_dim}:{min_dim}:{x_offset}:{y_offset}",
-        "-c:v", "libx264",
-        "-r", "30",
-        output_video_path
+        "-i",
+        input_video_path,
+        "-vf",
+        f"crop={min_dim}:{min_dim}:{x_offset}:{y_offset}",
+        "-c:v",
+        "libx264",
+        "-r",
+        "30",
+        output_video_path,
     ]
     subprocess.call(cmd)
 
     print(f"Video cropped and saved to: {output_video_path}")
 
 
+def extract_frame_number(frame_path):
+    # Extract the number from the filename, assuming the filename format is controlnet_pose_<number>.png
+    frame_name = frame_path.split("/")[-1]
+    return int(frame_name.split("_")[-1].split(".")[0])
+
+
 def process_video_frames(
-    input_video_path="/home/oop/dev/simicam/data/test.square.30fps.1080x1080.mp4",
-    base_output_dir="/home/oop/dev/simicam/logs/",
-    output_video_filename="output.mp4",
-    prompt:str = "humanoid robot dancing test, unreal engine, 8k render",
-    fps:int=30,
-    docker_url="http://localhost:5000/predictions",
+    input_video_path: str = "/home/oop/dev/simicam/data/test.square.30fps.1080x1080.mp4",
+    base_output_dir: str = "/home/oop/dev/simicam/logs/",
+    output_video_filename: str = "out.mp4",
+    prompt: str = "humanoid robot dancing test, unreal engine, 8k render",
+    fps: int = 30,
+    docker_url: str = "http://localhost:5000/predictions",
     **kwargs,
 ):
     # Generate a unique id for this generation session
@@ -90,12 +105,24 @@ def process_video_frames(
     # Run the controlnet docker container and remove it after use
     nuke_docker()
     docker_process = subprocess.Popen(
-        ["docker", "run", "--rm", "-p", "5000:5000", "--gpus=all", "controlnet_container"]
+        [
+            "docker",
+            "run",
+            "--rm",
+            "-p",
+            "5000:5000",
+            "--gpus=all",
+            "controlnet_container",
+        ]
     )
-    time.sleep(30) # Let the docker container startup
+    time.sleep(30)  # Let the docker container startup
 
     # Feed each frame to the controlnet docker container and save the output image
-    for i, frame_path in enumerate(glob.glob(os.path.join(output_dir, "raw_*.png"))):
+    for i, frame_path in enumerate(
+        sorted(
+            glob.glob(os.path.join(output_dir, "raw_*.png")), key=extract_frame_number
+        )
+    ):
         with open(frame_path, "rb") as img_file:
             response = requests.post(
                 docker_url,
@@ -122,13 +149,24 @@ def process_video_frames(
     # Run the bgremoval docker container
     nuke_docker()
     docker_process = subprocess.Popen(
-        ["docker", "run", "--rm",  "-p", "5000:5000", "--gpus=all", "bgremoval_container"]
+        [
+            "docker",
+            "run",
+            "--rm",
+            "-p",
+            "5000:5000",
+            "--gpus=all",
+            "bgremoval_container",
+        ]
     )
-    time.sleep(20) # Let the docker container startup
+    time.sleep(20)  # Let the docker container startup
 
     # Feed each frame to the bgremoval docker container
     for i, frame_path in enumerate(
-        glob.glob(os.path.join(output_dir, "controlnet_full_*.png"))
+        sorted(
+            glob.glob(os.path.join(output_dir, "controlnet_full_*.png")),
+            key=extract_frame_number,
+        )
     ):
         with open(frame_path, "rb") as img_file:
             response = requests.post(
@@ -157,7 +195,8 @@ def process_video_frames(
 
 if __name__ == "__main__":
     # Define the values you want to try for fps and prompt
-    fps_values = [10, 30, 60]
+    # fps_values = [10, 30, 60]
+    fps_values = [1]
     prompt_values = [
         "robot, battle droid, unreal engine",
         "shaman world of warcraft, mmo",
