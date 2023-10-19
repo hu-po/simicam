@@ -157,18 +157,18 @@ def process_video_frames(
 
 if __name__ == "__main__":
     # Define the values you want to try for fps and prompt
-    fps_values = [1, 2] # 24, 30, 60]
+    fps_values = [10, 30, 60]
     prompt_values = [
-        "humanoid robot dancing test, unreal engine, 8k render",
-        "shaman eagle dance, totem poles, moebius style",
+        "robot, battle droid, unreal engine",
+        "shaman world of warcraft, mmo",
     ]
 
     # Iterate over all combinations of fps and prompt values
     for fps in fps_values:
         for prompt in prompt_values:
             process_video_frames(
-                input_video_path="/home/oop/dev/simicam/data/test.square.30fps.1080x1080.mp4",
-                base_output_dir="/home/oop/dev/simicam/logs/",
+                input_video_path="/home/oop/dev/data/test.square.30fps.1080x1080.mp4",
+                base_output_dir="/home/oop/dev/data/",
                 output_video_filename=f"output_{fps}_{prompt[:5]}.mp4",
                 prompt=prompt,
                 fps=fps,
