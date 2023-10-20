@@ -196,10 +196,16 @@ def process_video_frames(
 
 if __name__ == "__main__":
     # Define the values you want to try for fps and prompt
-    fps_values = [1, 30] #, 60]
+    fps_values = [60]
     prompt_values = [
-        "robot, battle droid, unreal engine",
-        "shaman world of warcraft, mmo",
+        # "robot, battle droid, unreal engine",
+        # "shaman world of warcraft, mmo",
+        "anime mma fighter",
+        "captain america in style of moebius",
+        "obama white suit",
+        "elon musk anime",
+        "elon musk pixar",
+        "elon musk moebius",
     ]
 
     # Iterate over all combinations of fps and prompt values
